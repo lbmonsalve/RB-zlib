@@ -89,7 +89,7 @@ Protected Module zlib
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As FolderItem, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Deflate(Source As FolderItem, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Compress the Source file into the Destination file. Use Inflate to reverse.
 		  
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
@@ -97,7 +97,7 @@ Protected Module zlib
 		  Dim ok As Boolean
 		  Try
 		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		    ok = Deflate(src, dst, CompressionLevel, Encoding)
+		    ok = Deflate(src, dst, CompressionLevel, Encoding, ProgressHandler)
 		  Finally
 		    src.Close
 		    dst.Close
@@ -107,7 +107,7 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING) As MemoryBlock
+		Protected Function Deflate(Source As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' Compress the Source file and return it. Use Inflate to reverse.
 		  
 		  Dim buffer As New MemoryBlock(0)
@@ -116,7 +116,7 @@ Protected Module zlib
 		  Dim ok As Boolean
 		  Try
 		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		    ok = Deflate(src, dst, CompressionLevel, Encoding)
+		    ok = Deflate(src, dst, CompressionLevel, Encoding, ProgressHandler)
 		  Finally
 		    src.Close
 		    dst.Close
@@ -126,14 +126,14 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As FolderItem, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Deflate(Source As FolderItem, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Gzip the Source file into the Destination stream. Reverses the Deflate method
 		  
 		  Dim src As BinaryStream = BinaryStream.Open(Source)
 		  Dim ok As Boolean
 		  Try
 		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		    ok = Deflate(src, Destination, CompressionLevel, Encoding)
+		    ok = Deflate(src, Destination, CompressionLevel, Encoding, ProgressHandler)
 		  Finally
 		    src.Close
 		  End Try
@@ -142,14 +142,14 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As MemoryBlock, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Deflate(Source As MemoryBlock, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Compress the Source data into the Destination file. Use Inflate to reverse.
 		  
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
 		  Dim ok As Boolean
 		  Try
 		    ' calls Deflate(MemoryBlock, Writeable, Integer, Integer) As Boolean
-		    ok = Deflate(Source, dst, CompressionLevel, Encoding)
+		    ok = Deflate(Source, dst, CompressionLevel, Encoding, ProgressHandler)
 		  Finally
 		    dst.Close
 		  End Try
@@ -158,38 +158,38 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As MemoryBlock, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING) As MemoryBlock
+		Protected Function Deflate(Source As MemoryBlock, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' Compress the Source data and return it. Use Inflate to reverse.
 		  
 		  Dim buffer As New MemoryBlock(0)
 		  Dim dst As New BinaryStream(buffer)
 		  Dim src As New BinaryStream(Source)
 		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		  If Not Deflate(src, dst, CompressionLevel, Encoding) Then Return Nil
+		  If Not Deflate(src, dst, CompressionLevel, Encoding, ProgressHandler) Then Return Nil
 		  dst.Close
 		  Return buffer
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As MemoryBlock, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Deflate(Source As MemoryBlock, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Compress the Source data into the Destination stream. Use Inflate to reverse.
 		  
 		  Dim src As New BinaryStream(Source)
 		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		  Return Deflate(src, Destination, CompressionLevel, Encoding)
+		  Return Deflate(src, Destination, CompressionLevel, Encoding, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Deflate(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Compress the Source stream into the Destination file. Reverses the Deflate method
 		  
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
 		  Dim ok As Boolean
 		  Try
 		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		    ok = Deflate(Source, dst, CompressionLevel, Encoding)
+		    ok = Deflate(Source, dst, CompressionLevel, Encoding, ProgressHandler)
 		  Finally
 		    dst.Close
 		  End Try
@@ -198,20 +198,20 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As Readable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING) As MemoryBlock
+		Protected Function Deflate(Source As Readable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' Compress the Source stream and return it. Use Inflate to reverse.
 		  
 		  Dim buffer As New MemoryBlock(0)
 		  Dim stream As New BinaryStream(buffer)
 		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		  If Not Deflate(Source, stream, CompressionLevel, Encoding) Then Return Nil
+		  If Not Deflate(Source, stream, CompressionLevel, Encoding, ProgressHandler) Then Return Nil
 		  stream.Close
 		  Return buffer
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Deflate(Source As Readable, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Deflate(Source As Readable, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Deflate the Source stream and write the output to the Destination stream. Use Inflate to reverse.
 		  ' Calling this method with the default parameters produces the same output as zlib.Compress. The difference
 		  ' is that the size of the input to this method is not limited by available memory whereas Compress() has less
@@ -226,6 +226,7 @@ Protected Module zlib
 		  Try
 		    Do Until Source.EOF
 		      z.Write(Source.Read(CHUNK_SIZE))
+		      If ProgressHandler <> Nil And ProgressHandler.Invoke(z.TotalIn, z.TotalOut) Then Return False
 		    Loop
 		  Finally
 		    z.Close
@@ -282,66 +283,70 @@ Protected Module zlib
 		Private Soft Declare Function deflateTune Lib "zlib1" (ByRef Stream As z_stream, GoodLength As Integer, MaxLazy As Integer, NiceLength As Integer, MaxChain As Integer) As Integer
 	#tag EndExternalMethod
 
-	#tag Method, Flags = &h1
-		Protected Function GUnZip(Source As FolderItem) As MemoryBlock
-		  ' GUnZip the Source file and return it. Reverses the GZip method
-		  
-		  ' calls Inflate(Readable, MemoryBlock, Integer) As MemoryBlock
-		  Return Inflate(Source, Nil, GZIP_ENCODING)
-		End Function
-	#tag EndMethod
+	#tag DelegateDeclaration, Flags = &h1
+		Protected Delegate Function FlateProgress(BytesRead As UInt32, BytesWritten As UInt32) As Boolean
+	#tag EndDelegateDeclaration
 
 	#tag Method, Flags = &h1
-		Protected Function GUnZip(Source As FolderItem, Destination As FolderItem, Overwrite As Boolean = False) As Boolean
+		Protected Function GUnZip(Source As FolderItem, Destination As FolderItem, Overwrite As Boolean = False, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' GUnZip the Source file and write the output to the Destination file. Reverses the GZip method
 		  
 		  ' calls Inflate(FolderItem, FolderItem, Boolean, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Overwrite, Nil, GZIP_ENCODING)
+		  Return Inflate(Source, Destination, Overwrite, Nil, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GUnZip(Source As MemoryBlock) As MemoryBlock
-		  ' GUnZip the Source data and return it. Reverses the GZip method
+		Protected Function GUnZip(Source As FolderItem, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
+		  ' GUnZip the Source file and return it. Reverses the GZip method
 		  
-		  ' calls Inflate(MemoryBlock, MemoryBlock, Integer) As MemoryBlock
-		  Return Inflate(Source, Nil, GZIP_ENCODING)
+		  ' calls Inflate(Readable, MemoryBlock, Integer) As MemoryBlock
+		  Return Inflate(Source, Nil, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GUnZip(Source As MemoryBlock, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil) As Boolean
+		Protected Function GUnZip(Source As MemoryBlock, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' GUnzips the Source data into the Destination file. Reverses the GZip method
 		  
 		  ' calls Inflate(MemoryBlock, FolderItem, Boolean, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Overwrite, Dictionary, GZIP_ENCODING)
+		  Return Inflate(Source, Destination, Overwrite, Dictionary, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GUnZip(Source As Readable) As MemoryBlock
-		  ' GUnZip the Source stream and Return it. Reverses the GZip method
+		Protected Function GUnZip(Source As MemoryBlock, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
+		  ' GUnZip the Source data and return it. Reverses the GZip method
 		  
-		  ' calls Inflate(Readable, MemoryBlock, Integer) As MemoryBlock
-		  Return Inflate(Source, Nil, GZIP_ENCODING)
+		  ' calls Inflate(MemoryBlock, MemoryBlock, Integer) As MemoryBlock
+		  Return Inflate(Source, Nil, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GUnzip(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False) As Boolean
+		Protected Function GUnzip(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Gunzip the Source stream into the Destination file. Reverses the Deflate method
 		  
 		  ' calls Inflate(Readable, FolderItem, Boolean, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Overwrite, Nil, GZIP_ENCODING)
+		  Return Inflate(Source, Destination, Overwrite, Nil, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GUnZip(Source As Readable, Destination As Writeable) As Boolean
+		Protected Function GUnZip(Source As Readable, Destination As Writeable, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' gunzip the Source stream and write the output to the Destination stream. Reverses the GZip method
 		  
 		  ' calls Inflate(Readable, Writeable, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Nil, GZIP_ENCODING)
+		  Return Inflate(Source, Destination, Nil, GZIP_ENCODING, ProgressHandler)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function GUnZip(Source As Readable, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
+		  ' GUnZip the Source stream and Return it. Reverses the GZip method
+		  
+		  ' calls Inflate(Readable, MemoryBlock, Integer) As MemoryBlock
+		  Return Inflate(Source, Nil, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
@@ -362,65 +367,65 @@ Protected Module zlib
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GZip(Source As FolderItem, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False) As Boolean
+		Protected Function GZip(Source As FolderItem, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' GZip the Source file into the Destination file. Use GUnZip to reverse.
 		  
 		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		  Return Deflate(Source, Destination, CompressionLevel, Overwrite, GZIP_ENCODING)
+		  Return Deflate(Source, Destination, CompressionLevel, Overwrite, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GZip(Source As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As MemoryBlock
+		Protected Function GZip(Source As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' GZip the Source file and return it. Use GUnZip to reverse.
 		  
 		  ' calls Deflate(FolderItem, Integer, Integer) As Boolean
-		  Return Deflate(Source, CompressionLevel, GZIP_ENCODING)
+		  Return Deflate(Source, CompressionLevel, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GZip(Source As MemoryBlock, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False) As Boolean
+		Protected Function GZip(Source As MemoryBlock, Destination As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, Overwrite As Boolean = False, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' GZip the Source data into the Destination file. Use GUnZip to reverse.
 		  
 		  ' calls Deflate(MemoryBlock, FolderItem, Integer, Boolean, Integer) As Boolean
-		  Return Deflate(Source, Destination, CompressionLevel, Overwrite, GZIP_ENCODING)
+		  Return Deflate(Source, Destination, CompressionLevel, Overwrite, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GZip(Source As MemoryBlock, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As MemoryBlock
+		Protected Function GZip(Source As MemoryBlock, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' GZip the Source data and return it. Use GUnZip to reverse.
 		  
 		  ' calls Deflate(MemoryBlock, Integer, Integer) As MemoryBlock
-		  Return Deflate(Source, CompressionLevel, GZIP_ENCODING)
+		  Return Deflate(Source, CompressionLevel, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GZip(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As Boolean
+		Protected Function GZip(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Gunzip the Source stream into the Destination file. Reverses the Deflate method
 		  
 		  ' calls Deflate(Readable, FolderItem, Boolean, Integer, Integer) As Boolean
-		  Return Deflate(Source, Destination, Overwrite, CompressionLevel, GZIP_ENCODING)
+		  Return Deflate(Source, Destination, Overwrite, CompressionLevel, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GZip(Source As Readable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As MemoryBlock
+		Protected Function GZip(Source As Readable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' GZip the Source stream and return it. Use GUnZip to reverse.
 		  
 		  ' calls Deflate(Readable, Integer, Integer) As MemoryBlock
-		  Return Deflate(Source, CompressionLevel, GZIP_ENCODING)
+		  Return Deflate(Source, CompressionLevel, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GZip(Source As Readable, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As Boolean
+		Protected Function GZip(Source As Readable, Destination As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' GZip the Source stream and write the output to the Destination stream. Use GUnZip to reverse.
 		  
 		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		  Return Deflate(Source, Destination, CompressionLevel, GZIP_ENCODING)
+		  Return Deflate(Source, Destination, CompressionLevel, GZIP_ENCODING, ProgressHandler)
 		End Function
 	#tag EndMethod
 
@@ -453,7 +458,7 @@ Protected Module zlib
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Inflate(Source As FolderItem, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Inflate(Source As FolderItem, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Decompress the Source file and write the output to the Destination file. Reverses the Deflate method
 		  
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
@@ -461,7 +466,7 @@ Protected Module zlib
 		  Dim ok As Boolean
 		  Try
 		    ' calls Inflate(Readable, Writeable, MemoryBlock, Integer) As Boolean
-		    ok = Inflate(src, dst, Dictionary, Encoding)
+		    ok = Inflate(src, dst, Dictionary, Encoding, ProgressHandler)
 		  Finally
 		    src.Close
 		    dst.Close
@@ -471,7 +476,7 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Inflate(Source As FolderItem, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING) As MemoryBlock
+		Protected Function Inflate(Source As FolderItem, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' Decompress the Source file and return it. Reverses the Deflate method
 		  
 		  Dim buffer As New MemoryBlock(0)
@@ -480,7 +485,7 @@ Protected Module zlib
 		  Dim ok As Boolean
 		  Try
 		    ' calls Inflate(Readable, Writeable, MemoryBlock, Integer) As Boolean
-		    ok = Inflate(src, dst, Dictionary, Encoding)
+		    ok = Inflate(src, dst, Dictionary, Encoding, ProgressHandler)
 		  Finally
 		    src.Close
 		    dst.Close
@@ -490,7 +495,7 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Inflate(Source As MemoryBlock, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Inflate(Source As MemoryBlock, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Decompress the Source data into the Destination file. Reverses the Deflate method
 		  
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
@@ -498,7 +503,7 @@ Protected Module zlib
 		  Dim ok As Boolean
 		  Try
 		    ' calls Inflate(Readable, Writeable, MemoryBlock, Integer) As Boolean
-		    ok = Inflate(src, dst, Dictionary, Encoding)
+		    ok = Inflate(src, dst, Dictionary, Encoding, ProgressHandler)
 		  Finally
 		    src.Close
 		    dst.Close
@@ -508,24 +513,24 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Inflate(Source As MemoryBlock, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING) As MemoryBlock
+		Protected Function Inflate(Source As MemoryBlock, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' Decompress the Source data and return it. Reverses the Deflate method
 		  
 		  Dim src As New BinaryStream(Source)
 		  ' calls Inflate(Readable, MemoryBlock, Integer) As MemoryBlock
-		  Return Inflate(src, Dictionary, Encoding)
+		  Return Inflate(src, Dictionary, Encoding, ProgressHandler)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Inflate(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Inflate(Source As Readable, Destination As FolderItem, Overwrite As Boolean = False, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Decompress the Source stream into the Destination file. Reverses the Deflate method
 		  
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
 		  Dim ok As Boolean
 		  Try
 		    ' calls Inflate(Readable, Writeable, MemoryBlock, Integer) As Boolean
-		    ok = Inflate(Source, dst, Dictionary, Encoding)
+		    ok = Inflate(Source, dst, Dictionary, Encoding, ProgressHandler)
 		  Finally
 		    dst.Close
 		  End Try
@@ -534,26 +539,26 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Inflate(Source As Readable, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING) As MemoryBlock
+		Protected Function Inflate(Source As Readable, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As MemoryBlock
 		  ' Decompress the Source stream and return it. Reverses the Deflate method
 		  
 		  Dim buffer As New MemoryBlock(0)
 		  Dim stream As New BinaryStream(buffer)
 		  ' calls Inflate(Readable, Writeable, MemoryBlock, Integer) As Boolean
-		  If Not Inflate(Source, stream, Dictionary, Encoding) Then Return Nil
+		  If Not Inflate(Source, stream, Dictionary, Encoding, ProgressHandler) Then Return Nil
 		  stream.Close
 		  Return buffer
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Inflate(Source As Readable, Destination As Writeable, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING) As Boolean
+		Protected Function Inflate(Source As Readable, Destination As Writeable, Dictionary As MemoryBlock = Nil, Encoding As Integer = zlib.DEFLATE_ENCODING, ProgressHandler As zlib.FlateProgress = Nil) As Boolean
 		  ' Decompress the Source stream and write the output to the Destination stream. Reverses the Deflate method
 		  
 		  If Source IsA BinaryStream Then
-		    If Encoding = GZIP_ENCODING And Not BinaryStream(Source).IsGZipped Then 
+		    If Encoding = GZIP_ENCODING And Not BinaryStream(Source).IsGZipped Then
 		      Encoding = Z_DETECT
-		    ElseIf Encoding <> DEFLATE_ENCODING And BinaryStream(Source).IsDeflated Then 
+		    ElseIf Encoding <> DEFLATE_ENCODING And BinaryStream(Source).IsDeflated Then
 		      Encoding = DEFLATE_ENCODING
 		    End If
 		  End If
@@ -565,6 +570,7 @@ Protected Module zlib
 		    Do Until z.EOF
 		      Dim data As MemoryBlock = z.Read(CHUNK_SIZE)
 		      If data <> Nil And data.Size > 0 Then Destination.Write(Data)
+		      If ProgressHandler <> Nil And ProgressHandler.Invoke(z.TotalIn, z.TotalOut) Then Return False
 		    Loop
 		  Finally
 		    z.Close
