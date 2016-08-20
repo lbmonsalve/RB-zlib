@@ -109,7 +109,21 @@ Protected Class TapeArchive
 
 	#tag Method, Flags = &h0
 		Function CurrentName() As String
-		  If mIndex > -1 Then Return mHeader.Name.Trim
+		  If mIndex > -1 Then 
+		    Dim name As String = mHeader.Name.Trim
+		    'name = ReplaceAll(name, "/\", "")
+		    'name = ReplaceAll(name, "\/", "")
+		    'name = ReplaceAll(name, "//", "")
+		    'name = ReplaceAll(name, "\\", "")
+		    If Right(name, 1) = "/" Then name = Left(name, name.Len - 1)
+		    'If Right(name, 1) = "\" Then name = Left(name, name.Len - 1)
+		    'If TargetWin32 Then
+		    'name = ReplaceAll(name, "/", "\")
+		    'Else
+		    'name = ReplaceAll(name, "\", "/")
+		    'End If
+		    Return name
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -187,10 +201,26 @@ Protected Class TapeArchive
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function MoveNext(ExtractTo As FolderItem) As Boolean
+		Function MoveNext(ExtractTo As FolderItem, Overwrite As Boolean = False) As FolderItem
 		  Dim bs As BinaryStream
-		  If ExtractTo <> Nil Then bs = BinaryStream.Open(ExtractTo, False)
-		  Return Me.MoveNext(bs)
+		  Dim f As FolderItem = ExtractTo
+		  If ExtractTo <> Nil Then
+		    Dim path() As String = Split(CurrentName, "/")
+		    Do Until UBound(Path) = -1
+		      Dim s As String = Path(0)
+		      Path.Remove(0)
+		      f = f.Child(s)
+		      If f <> Nil And UBound(Path) > 0 Then f.CreateAsFolder
+		    Loop
+		    
+		    If Me.CurrentType = EntryType.Directory Then
+		      If f.Exists And Not f.Directory Then Return Nil
+		      f.CreateAsFolder
+		    Else
+		      bs = BinaryStream.Create(f, Overwrite)
+		    End If
+		  End If
+		  If Me.MoveNext(bs) Then Return f
 		End Function
 	#tag EndMethod
 

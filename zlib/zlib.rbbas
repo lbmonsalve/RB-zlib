@@ -84,6 +84,20 @@ Protected Module zlib
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub CreateAsFolderTree(Extends Leaf As FolderItem)
+		  Dim leafs() As FolderItem
+		  Do Until leaf.Exists
+		    leafs.Append(leaf)
+		    leaf = leaf.Parent
+		  Loop Until leaf = Nil
+		  
+		  Do Until UBound(leafs) = -1
+		    leafs.Pop.CreateAsFolder
+		  Loop
+		End Sub
+	#tag EndMethod
+
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function deflate Lib "zlib1" (ByRef Stream As z_stream, Flush As Integer) As Integer
 	#tag EndExternalMethod
@@ -749,12 +763,11 @@ Protected Module zlib
 		  Dim tar As TapeArchive = zlib.TapeArchive.Open(TarFile)
 		  Dim bs As BinaryStream
 		  Dim fs() As FolderItem
+		  Dim g As FolderItem = ExtractTo
 		  Do
-		    If bs <> Nil Then bs.Close
-		    Dim g As FolderItem = ExtractTo.Child(tar.CurrentName)
-		    bs = BinaryStream.Create(g, Overwrite)
-		    fs.Append(g)
-		  Loop Until Not tar.MoveNext(bs)
+		    g = tar.MoveNext(g, Overwrite)
+		    If g <> Nil Then fs.Append(g)
+		  Loop Until g = Nil
 		  bs.Close
 		  tar.Close
 		  Return fs
