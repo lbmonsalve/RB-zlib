@@ -57,9 +57,10 @@ Inherits FlateEngine
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Inflate(ReadFrom As Readable, WriteTo As Writeable) As Boolean
+		Function Inflate(ReadFrom As Readable, WriteTo As Writeable, ReadCount As Integer = - 1) As Boolean
 		  ' Reads from Source until Source.EOF and writes all output to WriteTo
 		  Dim outbuff As New MemoryBlock(CHUNK_SIZE)
+		  Dim tout As UInt32 = Me.Total_Out
 		  Do
 		    Dim chunk As MemoryBlock
 		    If ReadFrom <> Nil Then chunk = ReadFrom.Read(CHUNK_SIZE) Else chunk = ""
@@ -72,7 +73,7 @@ Inherits FlateEngine
 		      Dim have As UInt32 = CHUNK_SIZE - zstruct.avail_out
 		      If have > 0 Then WriteTo.Write(outbuff.StringValue(0, have))
 		    Loop Until mLastError <> Z_OK Or zstruct.avail_out <> 0
-		  Loop Until ReadFrom = Nil Or ReadFrom.EOF
+		  Loop Until ReadFrom = Nil Or ReadFrom.EOF Or (ReadCount > -1 And (Me.Total_Out - tout) > ReadCount)
 		  Select Case mLastError
 		  Case Z_OK, Z_STREAM_END, Z_BUF_ERROR
 		    Return True

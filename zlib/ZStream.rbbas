@@ -181,7 +181,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(InputStream As Readable, WindowBits As Integer = zlib.Z_DETECT) As zlib.ZStream
-		  ' read data from a deflate or gzip stream 
+		  ' read data from a deflate or gzip stream
 		  Dim zstruct As New Inflater(WindowBits)
 		  Return New zlib.ZStream(zstruct, InputStream)
 		  
@@ -196,7 +196,7 @@ Implements Readable,Writeable
 		  If mInflater = Nil Then Raise New IOException
 		  Dim data As New MemoryBlock(0)
 		  Dim ret As New BinaryStream(data)
-		  Dim tmp As MemoryBlock
+		  Dim size As Integer
 		  If BufferedReading Then
 		    If Count <= mReadBuffer.LenB Then
 		      ret.Write(LeftB(mReadBuffer, Count))
@@ -206,17 +206,15 @@ Implements Readable,Writeable
 		    Else
 		      ret.Write(mReadBuffer)
 		      mReadBuffer = ""
-		      tmp = mSource.Read(Max(Count, CHUNK_SIZE))
+		      size = Max(Count, CHUNK_SIZE)
 		    End If
 		  Else
-		    tmp = mSource.Read(Count)
+		    size = Count
 		  End If
-		  If tmp <> Nil Then
-		    Dim src As New BinaryStream(tmp)
-		    If Not mInflater.Inflate(src, ret) And mInflater.LastError <> Z_STREAM_END Then
+		  If size > 0 Then
+		    If Not mInflater.Inflate(mSource, ret, size) And mInflater.LastError <> Z_STREAM_END Then
 		      Raise New zlibException(mInflater.LastError)
 		    End If
-		    src.Close
 		    ret.Close
 		    If BufferedReading Then
 		      If data.Size >= Count Then
@@ -279,6 +277,7 @@ Implements Readable,Writeable
 		      EOL = EndOfLine.UNIX
 		    #endif
 		  End If
+		  
 		  Dim data As New MemoryBlock(0)
 		  Dim ret As New BinaryStream(data)
 		  Dim lastchar As String
