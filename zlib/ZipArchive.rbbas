@@ -97,9 +97,13 @@ Protected Class ZipArchive
 		    If mCurrentFile.Method = 0 Then ' not compressed
 		      If mCurrentFile.UncompressedSize > 0 Then ExtractTo.Write(mArchiveStream.Read(mCurrentFile.CompressedSize))
 		    ElseIf mCurrentFile.Method = &h08 Then ' deflated
+		      //Read the whole compressed file into memory since streaming breaks for some reason
 		      Dim data As MemoryBlock = mArchiveStream.Read(mCurrentFile.CompressedSize)
 		      Dim z As New ZStream(data)
 		      ExtractTo.Write(z.ReadAll)
+		      //this streaming technique SHOULD work but fails in bizarre ways for reasons unclear!
+		      'Dim flate As New Inflater(RAW_ENCODING)
+		      'If Not flate.Inflate(mArchiveStream, ExtractTo, mCurrentFile.CompressedSize) Then Raise New zlibException(ERR_NOT_ZIPPED)
 		    Else
 		      mLastError = ERR_NOT_ZIPPED
 		      Return False
