@@ -931,6 +931,25 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function ReadTar1(TarFile As FolderItem, ExtractTo As FolderItem, Overwrite As Boolean = False) As FolderItem()
+		  Dim bs As BinaryStream = BinaryStream.Open(TarFile)
+		  Dim ret() As FolderItem
+		  Dim tar As New TapeArchive(bs)
+		  Do Until tar.LastError <> 0
+		    Dim f As FolderItem = CreateTree(ExtractTo, tar.CurrentName)
+		    Dim outstream As BinaryStream
+		    If Not f.Directory Then outstream = BinaryStream.Create(f, Overwrite)
+		    Call tar.MoveNext(outstream)
+		    If outstream <> Nil Then outstream.Close
+		    ret.Append(f)
+		  Loop Until tar.LastError = ERR_END_ARCHIVE
+		  tar.Close
+		  Return ret
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function ReadZip(ZipFile As FolderItem, ExtractTo As FolderItem, Overwrite As Boolean = False) As FolderItem()
 		  ' Extracts a ZIP file to the ExtractTo directory
 		  

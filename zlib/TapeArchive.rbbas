@@ -109,7 +109,10 @@ Protected Class TapeArchive
 
 	#tag Method, Flags = &h0
 		Function CurrentName() As String
-		  If mIndex > -1 Then Return mHeader.Name.Trim
+		  If mIndex > -1 Then 
+		    If mCurrentLongName <> "" Then Return mCurrentLongName
+		    Return mHeader.Name.Trim
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -187,6 +190,12 @@ Protected Class TapeArchive
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function LastError() As Integer
+		  Return mLastError
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function MoveNext(ExtractTo As FolderItem) As Boolean
 		  Dim bs As BinaryStream
 		  If ExtractTo <> Nil Then bs = BinaryStream.Open(ExtractTo, False)
@@ -199,14 +208,21 @@ Protected Class TapeArchive
 		  ' Advances to the next file in the archive. If there are no more files then this method returns False.
 		  ' If ExtractTo is not Nil then the current file is written to that object *before* advancing.
 		  
+		  mLastError = 0
+		  Dim sz As Integer = Val("&o" + mHeader.Length.Trim)
+		  Dim blk As Integer
+		  If sz Mod 512 = 0 Then
+		    blk = sz
+		  Else
+		    blk = ((sz \ 512) * 512) + 512
+		  End If
 		  If ExtractTo <> Nil And mIndex > -1 Then
-		    Dim sz As Integer = Val("&o" + mHeader.Length.Trim)
-		    Dim blk As Integer = ((sz \ 512) * 512) + 512
-		    Dim mb As MemoryBlock = mArchive.Read(blk)
-		    ExtractTo.Write(mb.StringValue(0, sz))
+		    If blk <> 0 Then
+		      Dim mb As MemoryBlock = mArchive.Read(blk)
+		      ExtractTo.Write(mb.StringValue(0, sz))
+		    End If
 		  ElseIf mIndex <> -1 Then
-		    Dim sz As Integer = Val("&o" + mHeader.Length.Trim)
-		    mArchive.Position = mArchive.Position + ((sz \ 512) * 512) + 512
+		    mArchive.Position = mArchive.Position + blk
 		  End If
 		  Dim lastpos As UInt64 = mArchive.Position
 		  Dim mb As MemoryBlock = mArchive.Read(512)
@@ -215,27 +231,36 @@ Protected Class TapeArchive
 		    #pragma BreakOnExceptions Off
 		    header.StringValue(TargetLittleEndian) = mb.StringValue(0, header.Size)
 		    #pragma BreakOnExceptions On
+		    'If Chr(header.TypeFlag) = "L" And header.Name.Trim = "././@LongLink" Then ' long name
+		    'Dim nm As String
+		    'Dim nmmb As MemoryBlock
+		    'Do
+		    'nmmb = mArchive.Read(512)
+		    'nm = nm + Trim(nmmb)
+		    'If nmmb.Byte(nmmb.Size - 1) = 0 Then  Exit Do 'done
+		    'Loop
+		    'mCurrentLongName = nm
+		    'Else
 		    If header.Name.Trim = "" Then
+		      mLastError = ERR_INVALID_ENTRY
 		      mArchive.Position = lastpos
 		      Return False
+		    Else
+		      mCurrentLongName = ""
 		    End If
 		  Catch Err As OutOfBoundsException ' no more entries
+		    mLastError = ERR_END_ARCHIVE
 		    mArchive.Position = lastpos
 		    Return False
 		  End Try
 		  If ValidateChecksums And Not CurrentType = zlib.ArchiveEntryType.Directory Then
 		    Dim chksm As Integer = Val("&o" + header.Checksum.Trim)
 		    Dim hsum As Integer = GetCheckSum(header)
-		    If chksm <> hsum Then
-		      Dim err As New IOException
-		      err.Message = "Invalid header checksum for entry " + Str(mIndex + 1, "###,###,##0") + _
-		      ". Expected '" + Oct(chksm) + "' but got '" + Oct(hsum) + "'."
-		      Raise err
-		    End If
+		    If chksm <> hsum Then mLastError = ERR_CHECKSUM_MISMATCH
 		  End If
 		  mHeader = header
 		  mIndex = mIndex + 1
-		  Return True
+		  Return mLastError = 0
 		End Function
 	#tag EndMethod
 
@@ -272,6 +297,10 @@ Protected Class TapeArchive
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		Private mCurrentLongName As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
 		Private mDirty As Boolean
 	#tag EndProperty
 
@@ -281,6 +310,10 @@ Protected Class TapeArchive
 
 	#tag Property, Flags = &h21
 		Private mIndex As Integer = -1
+	#tag EndProperty
+
+	#tag Property, Flags = &h1
+		Protected mLastError As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
