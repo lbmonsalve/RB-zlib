@@ -1088,6 +1088,9 @@ Protected Module zlib
 	#tag Constant, Name = ERR_CHECKSUM_MISMATCH, Type = Double, Dynamic = False, Default = \"-204", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_CORRUPT_DIRECTORY, Type = Double, Dynamic = False, Default = \"-205", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_END_ARCHIVE, Type = Double, Dynamic = False, Default = \"-202", Scope = Protected
 	#tag EndConstant
 

@@ -2,87 +2,87 @@
 Protected Class ZipArchive
 	#tag Method, Flags = &h0
 		Function AppendFile(ZipPath As String, FileData As Readable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, ResetIndex As Integer = - 1) As Boolean
-		  If mDirectoryHeader.Signature <> DIRECTORY_SIGNATURE Then
-		    mLastError = ERR_NOT_ZIPPED
-		    Return False
-		  End If
-		  mArchiveStream.Flush
-		  mArchiveStream.Position = mDirectoryHeaderOffset
-		  
-		  Dim header As ZipFileHeader
-		  header.FilenameLength = ZipPath.LenB
-		  header.ExtraLength = 0
-		  header.Version = mDirectoryHeader.Version
-		  header.Signature = FILE_SIGNATURE
-		  Dim modtime As Pair = ConvertDate(New Date)
-		  header.ModDate = modtime.Left
-		  header.ModTime = modtime.Right
-		  Dim newfileheaderoffset As UInt64 = mArchiveStream.Position
-		  mArchiveStream.Length = mArchiveStream.Position + header.Size + ZipPath.LenB
-		  mArchiveStream.Position = mArchiveStream.Length
-		  Dim crc As UInt32
-		  If FileData <> Nil And (CompressionLevel > 0 Or CompressionLevel = Z_DEFAULT_COMPRESSION) Then
-		    header.Method = 8
-		    mZipStream.Deflater.Reset
-		    Do Until FileData.EOF
-		      Dim data As MemoryBlock = FileData.Read(CHUNK_SIZE)
-		      crc = zlib.CRC32(data, crc, data.Size)
-		      mZipStream.Write(data)
-		    Loop
-		    mZipStream.Flush(Z_FINISH)
-		    header.UncompressedSize = mZipStream.Deflater.Total_In
-		    header.CompressedSize = mZipStream.Deflater.Total_Out
-		  Else
-		    header.Method = 0
-		    Dim start As UInt64 = mArchiveStream.Position
-		    If FileData <> Nil Then
-		      Do Until FileData.EOF
-		        Dim data As MemoryBlock = FileData.Read(CHUNK_SIZE)
-		        crc = zlib.CRC32(data, crc, data.Size) 
-		        mArchiveStream.Write(data)
-		      Loop
-		    End If
-		    header.CompressedSize = mArchiveStream.Position - start
-		    header.UncompressedSize = header.CompressedSize
-		  End If
-		  header.CRC32 = crc
-		  mDirectoryHeaderOffset = mArchiveStream.Position ' record the endoffile/startofdirectory
-		  mArchiveStream.Flush
-		  
-		  ' write the file header
-		  mArchiveStream.Position = newfileheaderoffset
-		  mArchiveStream.Write(header.StringValue(True).Left(header.Size))
-		  mArchiveStream.Write(ZipPath)
-		  'mArchiveStream.Write(ZipExtra)
-		  mArchiveStream.Flush
-		  
-		  
-		  ' write the updated directory header
-		  mArchiveStream.Position = mDirectoryHeaderOffset
-		  mDirectoryHeader.CompressedSize = mDirectoryHeader.CompressedSize + header.CompressedSize
-		  mDirectoryHeader.UncompressedSize = mDirectoryHeader.UncompressedSize + header.UncompressedSize
-		  mDirectoryHeader.CRC32 = zlib.CRC32Combine(mDirectoryHeader.CRC32, header.CRC32, header.CompressedSize)
-		  mDirectoryHeader.ModDate = modtime.Left
-		  mDirectoryHeader.ModTime = modtime.Right
-		  mDirectoryHeader.CommentLength = mArchiveComment.Size
-		  If mArchiveName = "" Then mArchiveName = ZipPath
-		  mDirectoryHeader.FilenameLength = mArchiveName.Size
-		  mDirectoryHeader.ExtraLength = mExtraData.Size
-		  mArchiveStream.Write(mDirectoryHeader.StringValue(True).Left(mDirectoryHeader.Size))
-		  mArchiveStream.Write(mArchiveName)
-		  mArchiveStream.Write(mExtraData)
-		  mArchiveStream.Write(mArchiveComment)
-		  mArchiveStream.Flush
-		  
-		  ' write the updated directory footer
-		  mDirectoryFooter.DirectorySize = mArchiveStream.Position - mDirectoryHeaderOffset
-		  mDirectoryFooter.Offset = mDirectoryHeaderOffset
-		  mDirectoryFooter.ThisRecordCount = mDirectoryFooter.ThisRecordCount + 1
-		  mDirectoryFooter.TotalRecordCount = mDirectoryFooter.TotalRecordCount + 1
-		  mArchiveStream.Write(mDirectoryFooter.StringValue(True).Left(mDirectoryFooter.Size))
-		  mArchiveStream.Flush
-		  
-		  Return Me.Reset(ResetIndex)
+		  'If mDirectoryHeader.Signature <> DIRECTORY_SIGNATURE Then
+		  'mLastError = ERR_NOT_ZIPPED
+		  'Return False
+		  'End If
+		  'mArchiveStream.Flush
+		  'mArchiveStream.Position = mDirectoryFooter.Offset
+		  '
+		  'Dim header As ZipFileHeader
+		  'header.FilenameLength = ZipPath.LenB
+		  'header.ExtraLength = 0
+		  'header.Version = mDirectoryHeader.Version
+		  'header.Signature = FILE_SIGNATURE
+		  'Dim modtime As Pair = ConvertDate(New Date)
+		  'header.ModDate = modtime.Left
+		  'header.ModTime = modtime.Right
+		  'Dim newfileheaderoffset As UInt64 = mArchiveStream.Position
+		  'mArchiveStream.Length = mArchiveStream.Position + header.Size + ZipPath.LenB
+		  'mArchiveStream.Position = mArchiveStream.Length
+		  'Dim crc As UInt32
+		  'If FileData <> Nil And (CompressionLevel > 0 Or CompressionLevel = Z_DEFAULT_COMPRESSION) Then
+		  'header.Method = 8
+		  'mZipStream.Deflater.Reset
+		  'Do Until FileData.EOF
+		  'Dim data As MemoryBlock = FileData.Read(CHUNK_SIZE)
+		  'crc = zlib.CRC32(data, crc, data.Size)
+		  'mZipStream.Write(data)
+		  'Loop
+		  'mZipStream.Flush(Z_FINISH)
+		  'header.UncompressedSize = mZipStream.Deflater.Total_In
+		  'header.CompressedSize = mZipStream.Deflater.Total_Out
+		  'Else
+		  'header.Method = 0
+		  'Dim start As UInt64 = mArchiveStream.Position
+		  'If FileData <> Nil Then
+		  'Do Until FileData.EOF
+		  'Dim data As MemoryBlock = FileData.Read(CHUNK_SIZE)
+		  'crc = zlib.CRC32(data, crc, data.Size)
+		  'mArchiveStream.Write(data)
+		  'Loop
+		  'End If
+		  'header.CompressedSize = mArchiveStream.Position - start
+		  'header.UncompressedSize = header.CompressedSize
+		  'End If
+		  'header.CRC32 = crc
+		  'mDirectoryFooter.Offset = mArchiveStream.Position ' record the endoffile/startofdirectory
+		  'mArchiveStream.Flush
+		  '
+		  '' write the file header
+		  'mArchiveStream.Position = newfileheaderoffset
+		  'mArchiveStream.Write(header.StringValue(True).Left(header.Size))
+		  'mArchiveStream.Write(ZipPath)
+		  ''mArchiveStream.Write(ZipExtra)
+		  'mArchiveStream.Flush
+		  '
+		  '
+		  '' write the updated directory header
+		  'mArchiveStream.Position = mDirectoryFooter.Offset
+		  'mDirectoryHeader.CompressedSize = mDirectoryHeader.CompressedSize + header.CompressedSize
+		  'mDirectoryHeader.UncompressedSize = mDirectoryHeader.UncompressedSize + header.UncompressedSize
+		  'mDirectoryHeader.CRC32 = zlib.CRC32Combine(mDirectoryHeader.CRC32, header.CRC32, header.CompressedSize)
+		  'mDirectoryHeader.ModDate = modtime.Left
+		  'mDirectoryHeader.ModTime = modtime.Right
+		  'mDirectoryHeader.CommentLength = mArchiveComment.Size
+		  'If mArchiveName = "" Then mArchiveName = ZipPath
+		  'mDirectoryHeader.FilenameLength = mArchiveName.Size
+		  'mDirectoryHeader.ExtraLength = mExtraData.Size
+		  'mArchiveStream.Write(mDirectoryHeader.StringValue(True).Left(mDirectoryHeader.Size))
+		  'mArchiveStream.Write(mArchiveName)
+		  'mArchiveStream.Write(mExtraData)
+		  'mArchiveStream.Write(mArchiveComment)
+		  'mArchiveStream.Flush
+		  '
+		  '' write the updated directory footer
+		  'mDirectoryFooter.DirectorySize = mArchiveStream.Position - mDirectoryFooter.Offset
+		  'mDirectoryFooter.Offset = mDirectoryFooter.Offset
+		  'mDirectoryFooter.ThisRecordCount = mDirectoryFooter.ThisRecordCount + 1
+		  'mDirectoryFooter.TotalRecordCount = mDirectoryFooter.TotalRecordCount + 1
+		  'mArchiveStream.Write(mDirectoryFooter.StringValue(True).Left(mDirectoryFooter.Size))
+		  'mArchiveStream.Flush
+		  '
+		  'Return Me.Reset(ResetIndex)
 		  
 		End Function
 	#tag EndMethod
@@ -94,25 +94,28 @@ Protected Class ZipArchive
 		    mZipStream.Close
 		    mArchiveStream = Nil
 		    mIndex = -1
-		    mDirectoryHeaderOffset = 0
+		    mDirectoryFooter.Offset = 0
 		  End If
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(ArchiveStream As BinaryStream)
+		Sub Constructor(ArchiveStream As BinaryStream, ReadDirectory As Boolean = True)
 		  mArchiveStream = ArchiveStream
 		  mArchiveStream.LittleEndian = True
+		  mReadDirectory = ReadDirectory
 		  If Not Me.Reset(0) Then Raise New zlibException(ERR_NOT_ZIPPED)
 		  mZipStream = ZStream.Open(mArchiveStream, RAW_ENCODING)
 		  mZipStream.BufferedReading = False
+		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(ArchiveStream As BinaryStream, CompressionLevel As Integer)
+		Sub Constructor(ArchiveStream As BinaryStream, CompressionLevel As Integer, ReadDirectory As Boolean = True)
 		  mArchiveStream = ArchiveStream
 		  mArchiveStream.LittleEndian = True
+		  mReadDirectory = ReadDirectory
 		  If Not Me.Reset(0) Then Raise New zlibException(ERR_NOT_ZIPPED)
 		  mZipStream = ZStream.CreatePipe(mArchiveStream, mArchiveStream, CompressionLevel, Z_DEFAULT_STRATEGY, RAW_ENCODING, DEFAULT_MEM_LVL)
 		  mZipStream.BufferedReading = False
@@ -278,7 +281,7 @@ Protected Class ZipArchive
 
 	#tag Method, Flags = &h0
 		Function MoveNext(ExtractTo As Writeable) As Boolean
-		  If mDirectoryHeaderOffset = 0 Then Raise New IOException
+		  If mDirectoryFooter.Offset = 0 Then Raise New IOException
 		  ' extract the current item
 		  If ExtractTo <> Nil Then
 		    Select Case mCurrentFile.Method
@@ -309,7 +312,7 @@ Protected Class ZipArchive
 		  If ValidateChecksums Then mRunningCRC = zlib.CRC32Combine(mRunningCRC, mCurrentCRC, mCurrentFile.UncompressedSize)
 		  
 		  ' read the next entry header
-		  If mArchiveStream.Position >= mDirectoryHeaderOffset Then
+		  If mArchiveStream.Position >= mDirectoryFooter.Offset Then
 		    mLastError = ERR_END_ARCHIVE
 		    Return False
 		  End If
@@ -322,11 +325,12 @@ Protected Class ZipArchive
 		    mCurrentName = mArchiveStream.Read(mCurrentFile.FilenameLength)
 		    mCurrentExtra = mArchiveStream.Read(mCurrentFile.ExtraLength)
 		    
-		    If BitAnd(mCurrentFile.Flag, 4) = 4 And mCurrentFile.CompressedSize = 0 Then ' footer follows
+		    If mCurrentFile.CompressedSize = 0 Then
 		      Dim footer As ZipFileFooter
+		      Dim pos As UInt64 = mArchiveStream.Position
 		      footer.StringValue(True) = mArchiveStream.Read(footer.Size)
 		      If footer.Signature <> FILE_FOOTER_SIGNATURE Then
-		        mArchiveStream.Position = mArchiveStream.Position - footer.Size
+		        mArchiveStream.Position = pos
 		      Else
 		        mCurrentFile.CompressedSize = footer.ComressedSize
 		        mCurrentFile.UncompressedSize = footer.UncompressedSize
@@ -342,8 +346,8 @@ Protected Class ZipArchive
 	#tag Method, Flags = &h0
 		 Shared Function Open(ZipFile As FolderItem, Readwrite As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As zlib.ZipArchive
 		  Dim bs As BinaryStream = BinaryStream.Open(ZipFile, Readwrite)
-		  If bs <> Nil Then 
-		    If Readwrite Then 
+		  If bs <> Nil Then
+		    If Readwrite Then
 		      Return New zlib.ZipArchive(bs, CompressionLevel)
 		    Else
 		      Return New zlib.ZipArchive(bs)
@@ -352,22 +356,48 @@ Protected Class ZipArchive
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Function ReadDirectory() As Boolean
+		  ReDim mDirectory(-1)
+		  ReDim mComments(-1)
+		  ReDim mExtras(-1)
+		  ReDim mNames(-1)
+		  
+		  Do Until mArchiveStream.Position >= mDirectoryFooterOffset
+		    Dim header As ZipDirectoryHeader
+		    header.StringValue(True) = mArchiveStream.Read(header.Size)
+		    mNames.Append(mArchiveStream.Read(header.FilenameLength))
+		    mExtras.Append(mArchiveStream.Read(header.ExtraLength))
+		    mComments.Append(mArchiveStream.Read(header.CommentLength))
+		    mDirectory.Append(header)
+		  Loop
+		  
+		  Return mDirectory.Ubound + 1 = mDirectoryFooter.ThisRecordCount
+		  
+		Exception
+		  ReDim mDirectory(-1)
+		  ReDim mComments(-1)
+		  ReDim mExtras(-1)
+		  ReDim mNames(-1)
+		  Return False
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Function Reset(Index As Integer = 0) As Boolean
 		  mArchiveStream.Position = mArchiveStream.Length - 4
-		  mDirectoryHeaderOffset = 0
-		  mDirectoryHeader.StringValue(True) = ""
+		  mDirectoryFooter.Offset = 0
+		  'mDirectoryHeader.StringValue(True) = ""
+		  mDirectoryFooterOffset = 0
+		  mDirectoryFooter.StringValue(True) = ""
 		  mRunningCRC = 0
-		  Do Until mDirectoryHeaderOffset > 0
+		  Do Until mDirectoryFooter.Offset > 0
 		    If mArchiveStream.ReadUInt32 = DIRECTORY_FOOTER_HEADER Then
 		      mArchiveStream.Position = mArchiveStream.Position - 4
+		      mDirectoryFooterOffset = mArchiveStream.Position
 		      mDirectoryFooter.StringValue(True) = mArchiveStream.Read(mDirectoryFooter.Size)
 		      mArchiveStream.Position = mDirectoryFooter.Offset
-		      mDirectoryHeaderOffset = mArchiveStream.Position
-		      mDirectoryHeader.StringValue(True) = mArchiveStream.Read(mDirectoryHeader.Size)
-		      mArchiveName = mArchiveStream.Read(mDirectoryHeader.FilenameLength)
-		      mExtraData = mArchiveStream.Read(mDirectoryHeader.ExtraLength)
-		      mArchiveComment = mArchiveStream.Read(mDirectoryHeader.CommentLength)
+		      mDirectoryFooter.Offset = mArchiveStream.Position
 		      If mDirectoryFooter.ThisRecordCount = 0 Then
 		        mIndex = -1
 		        Return True
@@ -381,105 +411,57 @@ Protected Class ZipArchive
 		  mCurrentExtra = Nil
 		  mCurrentFile.StringValue(True) = ""
 		  mCurrentName = ""
-		  If mDirectoryHeaderOffset = 0 Then
+		  If mDirectoryFooter.Offset = 0 Then
 		    mLastError = ERR_NOT_ZIPPED
 		    Return False
 		  End If
 		  
-		  mArchiveStream.Position = mDirectoryHeader.Offset
-		  Do
-		    If Not Me.MoveNext(Nil) Then Return (Index = -1 And mLastError = ERR_END_ARCHIVE)
-		  Loop Until mIndex >= Index And Index > -1
+		  mArchiveStream.Position = mDirectoryFooter.Offset
+		  If mReadDirectory And Not ReadDirectory() Then
+		    ' don't try to read it without a directory
+		    mLastError = ERR_CORRUPT_DIRECTORY
+		    Return False
+		  End If
+		  If mReadDirectory Then
+		    ' successfully read the directory
+		    mIndex = Max(Index, 0)
+		    mArchiveStream.Position = mDirectory(mIndex).Offset
+		    Call Me.MoveNext(Nil)
+		    mArchiveStream.Position = mDirectory(mIndex).Offset
+		  Else
+		    ' read the archive without the directory
+		    mArchiveStream.Position = 0
+		    Do
+		      If Not Me.MoveNext(Nil) Then Return (Index = -1 And mLastError = ERR_END_ARCHIVE)
+		    Loop Until mIndex >= Index And Index > -1
+		  End If
 		  Return True
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Test() As Boolean
-		  If Not Me.Reset(0) Then Return False
-		  Dim vc As Boolean = ValidateChecksums
-		  ValidateChecksums = True
-		  Dim bs As BinaryStream
-		  Do
-		    Dim data As New MemoryBlock(0)
-		    bs = New BinaryStream(data)
-		    bs.Close
-		  Loop Until Not Me.MoveNext(bs)
-		  ValidateChecksums = vc
-		  If mLastError = ERR_END_ARCHIVE Then Return mRunningCRC = mDirectoryHeader.CRC32
+		  'If Not Me.Reset(0) Then Return False
+		  'Dim vc As Boolean = ValidateChecksums
+		  'ValidateChecksums = True
+		  'Dim bs As BinaryStream
+		  'Do
+		  'Dim data As New MemoryBlock(0)
+		  'bs = New BinaryStream(data)
+		  'bs.Close
+		  'Loop Until Not Me.MoveNext(bs)
+		  'ValidateChecksums = vc
+		  'If mLastError = ERR_END_ARCHIVE Then Return mRunningCRC = mDirectoryFooter.CRC32
 		End Function
 	#tag EndMethod
 
 
-	#tag ComputedProperty, Flags = &h0
-		#tag Getter
-			Get
-			  If mArchiveComment <> Nil Then Return mArchiveComment
-			End Get
-		#tag EndGetter
-		#tag Setter
-			Set
-			  mArchiveComment = value
-			End Set
-		#tag EndSetter
-		ArchiveComment As String
-	#tag EndComputedProperty
-
-	#tag ComputedProperty, Flags = &h0
-		#tag Getter
-			Get
-			  If mArchiveName <> Nil Then Return mArchiveName
-			End Get
-		#tag EndGetter
-		#tag Setter
-			Set
-			  mArchiveName = value
-			End Set
-		#tag EndSetter
-		ArchiveName As String
-	#tag EndComputedProperty
-
-	#tag ComputedProperty, Flags = &h0
-		#tag Getter
-			Get
-			  Select Case True
-			  Case BitAnd(mDirectoryHeader.Flag, 1) = 1 And BitAnd(mDirectoryHeader.Flag, 2) = 2
-			    Return 1 ' fastest
-			  Case BitAnd(mDirectoryHeader.Flag, 1) = 1 And BitAnd(mDirectoryHeader.Flag, 2) <> 2
-			    Return 9 ' best
-			  Case BitAnd(mDirectoryHeader.Flag, 1) <> 1 And BitAnd(mDirectoryHeader.Flag, 2) <> 2
-			    Return 6 ' normal
-			  Case BitAnd(mDirectoryHeader.Flag, 1) <> 1 And BitAnd(mDirectoryHeader.Flag, 2) = 2
-			    Return 3 ' fast
-			  Case mDirectoryHeader.Method = 0
-			    Return 0 ' none
-			  End Select
-			  
-			  
-			End Get
-		#tag EndGetter
-		CompressionLevel As Integer
-	#tag EndComputedProperty
-
-	#tag ComputedProperty, Flags = &h0
-		#tag Getter
-			Get
-			  Return BitAnd(mDirectoryHeader.Flag, 1) = 1
-			End Get
-		#tag EndGetter
-		IsEncrypted As Boolean
-	#tag EndComputedProperty
-
-	#tag Property, Flags = &h21
-		Private mArchiveComment As MemoryBlock
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mArchiveName As MemoryBlock
-	#tag EndProperty
-
 	#tag Property, Flags = &h21
 		Private mArchiveStream As BinaryStream
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mComments() As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
@@ -503,19 +485,19 @@ Protected Class ZipArchive
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		Private mDirectory() As ZipDirectoryHeader
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
 		Private mDirectoryFooter As ZipDirectoryFooter
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mDirectoryHeader As ZipDirectoryHeader
+		Private mDirectoryFooterOffset As UInt32
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mDirectoryHeaderOffset As UInt32
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mExtraData As MemoryBlock
+		Private mExtras() As MemoryBlock
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
@@ -524,6 +506,14 @@ Protected Class ZipArchive
 
 	#tag Property, Flags = &h1
 		Protected mLastError As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mNames() As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		mReadDirectory As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
@@ -558,11 +548,31 @@ Protected Class ZipArchive
 
 	#tag ViewBehavior
 		#tag ViewProperty
+			Name="ArchiveComment"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ArchiveName"
+			Group="Behavior"
+			Type="String"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CompressionLevel"
+			Group="Behavior"
+			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Index"
 			Visible=true
 			Group="ID"
 			InitialValue="-2147483648"
 			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="IsEncrypted"
+			Group="Behavior"
+			Type="Boolean"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Left"
@@ -589,6 +599,12 @@ Protected Class ZipArchive
 			Group="Position"
 			InitialValue="0"
 			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ValidateChecksums"
+			Group="Behavior"
+			InitialValue="True"
+			Type="Boolean"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
