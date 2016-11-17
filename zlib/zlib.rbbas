@@ -74,7 +74,7 @@ Protected Module zlib
 		    End If
 		  Loop
 		  Dim out As FolderItem = Root.Parent.Child(Root.Name + ".zip")
-		  If Not WriteZip(Root, files, out) Then 
+		  If Not WriteZip(Root, files, out) Then
 		    If out <> Nil Then out.Delete
 		    out = Nil
 		  End If
@@ -150,7 +150,7 @@ Protected Module zlib
 		  s.Remove(0)
 		  If UBound(s) = -1 Then Return root
 		  If Root.Exists Then
-		    If Not Root.Directory Then 
+		    If Not Root.Directory Then
 		      Dim err As New IOException
 		      err.Message = "'" + name + "' is not a directory!"
 		      Raise err
@@ -740,9 +740,9 @@ Protected Module zlib
 		  ' Decompress the Source stream and write the output to the Destination stream. Reverses the Deflate method
 		  
 		  If Source IsA BinaryStream Then
-		    If Encoding = GZIP_ENCODING And Not BinaryStream(Source).IsGZipped Then 
+		    If Encoding = GZIP_ENCODING And Not BinaryStream(Source).IsGZipped Then
 		      Encoding = Z_DETECT
-		    ElseIf Encoding <> DEFLATE_ENCODING And BinaryStream(Source).IsDeflated Then 
+		    ElseIf Encoding <> DEFLATE_ENCODING And BinaryStream(Source).IsDeflated Then
 		      Encoding = DEFLATE_ENCODING
 		    End If
 		  End If
@@ -936,21 +936,21 @@ Protected Module zlib
 
 	#tag Method, Flags = &h1
 		Protected Function ReadZip(ZipFile As FolderItem, ExtractTo As FolderItem, Overwrite As Boolean = False) As FolderItem()
-		  ' Extracts a ZIP file to the ExtractTo directory
-		  
-		  Dim bs As BinaryStream = BinaryStream.Open(ZipFile)
-		  Dim ret() As FolderItem
-		  Dim zip As New ZipArchive(bs)
-		  Do Until zip.LastError <> 0
-		    Dim f As FolderItem = CreateTree(ExtractTo, zip.CurrentName)
-		    Dim outstream As BinaryStream
-		    If Not f.Directory Then outstream = BinaryStream.Create(f, Overwrite)
-		    Call zip.MoveNext(outstream)
-		    If outstream <> Nil Then outstream.Close
-		    ret.Append(f)
-		  Loop Until zip.LastError = ERR_END_ARCHIVE
-		  zip.Close
-		  Return ret
+		  '' Extracts a ZIP file to the ExtractTo directory
+		  '
+		  'Dim bs As BinaryStream = BinaryStream.Open(ZipFile)
+		  'Dim ret() As FolderItem
+		  'Dim zip As New ZipArchive(bs)
+		  'Do Until zip.LastError <> 0
+		  'Dim f As FolderItem = CreateTree(ExtractTo, zip.CurrentName)
+		  'Dim outstream As BinaryStream
+		  'If Not f.Directory Then outstream = BinaryStream.Create(f, Overwrite)
+		  'Call zip.MoveNext(outstream)
+		  'If outstream <> Nil Then outstream.Close
+		  'ret.Append(f)
+		  'Loop Until zip.LastError = ERR_END_ARCHIVE
+		  'zip.Close
+		  'Return ret
 		  
 		End Function
 	#tag EndMethod
@@ -1017,24 +1017,24 @@ Protected Module zlib
 
 	#tag Method, Flags = &h1
 		Protected Function WriteZip(RelativeRoot As FolderItem = Nil, ToArchive() As FolderItem, OutputFile As FolderItem) As Boolean
-		  ' Creates/appends a Zip file with the ToArchive FolderItems
-		  Dim zip As zlib.ZipArchive
-		  If OutputFile.Exists Then
-		    zip = zlib.ZipArchive.Open(OutputFile, True)
-		  Else
-		    zip = zlib.ZipArchive.Create(OutputFile)
-		  End If
-		  For i As Integer = 0 To UBound(ToArchive)
-		    Dim item As FolderItem = ToArchive(i)
-		    Dim zippath As String
-		    If RelativeRoot <> Nil Then zippath = CreateTree(RelativeRoot, item) Else zippath = item.Name
-		    Dim bs As BinaryStream
-		    If Not item.Directory Then bs = BinaryStream.Open(item)
-		    If Not zip.AppendFile(zippath, bs) Then Return False
-		  Next
-		  zip.Close
-		  Return True
-		  
+		  '' Creates/appends a Zip file with the ToArchive FolderItems
+		  'Dim zip As zlib.ZipArchive
+		  'If OutputFile.Exists Then
+		  'zip = zlib.ZipArchive.Open(OutputFile, True)
+		  'Else
+		  'zip = zlib.ZipArchive.Create(OutputFile)
+		  'End If
+		  'For i As Integer = 0 To UBound(ToArchive)
+		  'Dim item As FolderItem = ToArchive(i)
+		  'Dim zippath As String
+		  'If RelativeRoot <> Nil Then zippath = CreateTree(RelativeRoot, item) Else zippath = item.Name
+		  'Dim bs As BinaryStream
+		  'If Not item.Directory Then bs = BinaryStream.Open(item)
+		  'If Not zip.AppendFile(zippath, bs) Then Return False
+		  'Next
+		  'zip.Close
+		  'Return True
+		  '
 		  
 		End Function
 	#tag EndMethod
@@ -1227,58 +1227,6 @@ Protected Module zlib
 		  CommentMax As UInt32
 		  hcrc As Integer
 		Done As Integer
-	#tag EndStructure
-
-	#tag Structure, Name = ZipDirectoryFooter, Flags = &h21
-		Signature As UInt32
-		  ThisDisk As UInt16
-		  FirstDisk As UInt16
-		  ThisRecordCount As UInt16
-		  TotalRecordCount As UInt16
-		  DirectorySize As UInt32
-		  Offset As UInt32
-		CommentLength As UInt16
-	#tag EndStructure
-
-	#tag Structure, Name = ZipDirectoryHeader, Flags = &h21
-		Signature As UInt32
-		  Version As UInt16
-		  VersionNeeded As UInt16
-		  Flag As UInt16
-		  Method As UInt16
-		  ModTime As UInt16
-		  ModDate As UInt16
-		  CRC32 As UInt32
-		  CompressedSize As UInt32
-		  UncompressedSize As UInt32
-		  FilenameLength As UInt16
-		  ExtraLength As UInt16
-		  CommentLength As UInt16
-		  DiskNumber As UInt16
-		  InternalAttributes As UInt16
-		  ExternalAttributes As UInt32
-		Offset As UInt32
-	#tag EndStructure
-
-	#tag Structure, Name = ZipFileFooter, Flags = &h21
-		Signature As UInt32
-		  CRC32 As UInt32
-		  ComressedSize As UInt32
-		UncompressedSize As UInt32
-	#tag EndStructure
-
-	#tag Structure, Name = ZipFileHeader, Flags = &h21
-		Signature As UInt32
-		  Version As UInt16
-		  Flag As UInt16
-		  Method As UInt16
-		  ModTime As UInt16
-		  ModDate As UInt16
-		  CRC32 As UInt32
-		  CompressedSize As UInt32
-		  UncompressedSize As UInt32
-		  FilenameLength As UInt16
-		ExtraLength As UInt16
 	#tag EndStructure
 
 	#tag Structure, Name = z_stream, Flags = &h21
