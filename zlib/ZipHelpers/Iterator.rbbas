@@ -24,20 +24,23 @@ Protected Class Iterator
 		Function MoveNext(WriteTo As Writeable) As Boolean
 		  If mCurrentItem <> Nil Then
 		    If WriteTo <> Nil Then
-		      WriteTo.Write(mFileStream.Read(mCurrentItem.CompressedSize))
+		      Dim z As zlib.ZStream = zlib.ZStream.Open(mFileStream, RAW_ENCODING)
+		      z.BufferedReading = False
+		      WriteTo.Write(z.Read(mCurrentItem.CompressedSize))
 		    Else
 		      mFileStream.Position = mFileStream.Position + mCurrentItem.CompressedSize
 		    End If
 		  End If
 		  
 		  Select Case mFileStream.ReadUInt32
-		  Case FILE_SIGNATURE 
+		  Case FILE_SIGNATURE
 		    mFileStream.Position = mFileStream.Position - 4
+		    Dim pos As UInt64 = mFileStream.Position
 		    Dim header As ZipFileHeader
 		    header.StringValue(True) = mFileStream.Read(header.Size)
 		    Dim name As String = mFileStream.Read(header.FilenameLength)
 		    Dim extra As MemoryBlock = mFileStream.Read(header.ExtraLength)
-		    mCurrentItem = New ZipEntry(header, name, extra, mFileStream.Position)
+		    mCurrentItem = New ZipEntry(header, name, extra, pos)
 		  Case DIRECTORY_SIGNATURE
 		    mLastError = ERR_END_ARCHIVE
 		  Else

@@ -6,8 +6,8 @@ Protected Class ZipEntry
 		  mName = FileName
 		  mExtra = ExtraData
 		  mIsAFileHeader = False
-		  mOffset = mZipDirectoryHeader.Offset
 		  mComment = Comment
+		  mOffset = Header.Offset
 		End Sub
 	#tag EndMethod
 
@@ -20,6 +20,12 @@ Protected Class ZipEntry
 		  mOffset = DataOffset
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherItem As zlib.ZipHelpers.ZipEntry) As Integer
+		  Break
+		End Function
 	#tag EndMethod
 
 
@@ -89,6 +95,15 @@ Protected Class ZipEntry
 		Flag As UInt16
 	#tag EndComputedProperty
 
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  Return Right(FileName, 1) = "/"
+			End Get
+		#tag EndGetter
+		IsDirectory As Boolean
+	#tag EndComputedProperty
+
 	#tag Property, Flags = &h1
 		Protected mComment As String
 	#tag EndProperty
@@ -112,6 +127,10 @@ Protected Class ZipEntry
 
 	#tag Property, Flags = &h1
 		Protected mIsAFileHeader As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mIsDirectory As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
@@ -151,6 +170,15 @@ Protected Class ZipEntry
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  Return mOffset
+			End Get
+		#tag EndGetter
+		Offset As UInt64
+	#tag EndComputedProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
 			  If mIsAFileHeader Then
 			    Return mZipFileHeader.UncompressedSize
 			  Else
@@ -177,11 +205,28 @@ Protected Class ZipEntry
 
 	#tag ViewBehavior
 		#tag ViewProperty
+			Name="Comment"
+			Group="Behavior"
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="FileName"
+			Group="Behavior"
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Index"
 			Visible=true
 			Group="ID"
 			InitialValue="-2147483648"
 			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="IsDirectory"
+			Group="Behavior"
+			Type="Boolean"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Left"

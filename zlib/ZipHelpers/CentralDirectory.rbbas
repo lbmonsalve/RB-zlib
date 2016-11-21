@@ -30,6 +30,52 @@ Protected Class CentralDirectory
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Extract(Item As zlib.ZipHelpers.ZipEntry, WriteTo As FolderItem, Overwrite As Boolean = False) As Boolean
+		  If mEntries.IndexOf(Item) = -1 Then Raise New KeyNotFoundException
+		  Dim bs As BinaryStream = BinaryStream.Create(WriteTo, Overwrite)
+		  Dim ok As Boolean = Me.Extract(Item, bs)
+		  bs.Close
+		  Return ok
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Extract(Item As zlib.ZipHelpers.ZipEntry, WriteTo As Writeable) As Boolean
+		  If mEntries.IndexOf(Item) = -1 Then Raise New KeyNotFoundException
+		  
+		  mFileStream.Position = Item.Offset
+		  If mFileStream.ReadUInt32 = FILE_SIGNATURE Then
+		    mFileStream.Position = mFileStream.Position - 4
+		    Dim header As ZipFileHeader
+		    header.StringValue(True) = mFileStream.Read(header.Size)
+		    Call mFileStream.Read(header.FilenameLength)
+		    Call mFileStream.Read(header.ExtraLength)
+		    
+		    
+		    Select Case header.Method
+		    Case 0 ' not compressed
+		      WriteTo.Write(mFileStream.Read(Item.CompressedSize))
+		      Return True
+		      
+		    Case 8 ' deflated
+		      Dim z As zlib.ZStream = zlib.ZStream.Open(mFileStream, RAW_ENCODING)
+		      z.BufferedReading = False
+		      WriteTo.Write(z.Read(Item.CompressedSize))
+		      z.Close
+		      Return True
+		    Else
+		      mLastError = ERR_NOT_ZIPPED
+		    End Select
+		    
+		  Else
+		    mLastError = ERR_INVALID_ENTRY
+		  End If
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Item(Index As Integer) As ZipEntry
 		  Return mEntries(Index)
 		End Function
