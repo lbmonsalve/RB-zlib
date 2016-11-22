@@ -4,7 +4,7 @@ Protected Class Iterator
 		Sub Constructor(ZipStream As BinaryStream)
 		  mFileStream = ZipStream
 		  mFileStream.LittleEndian = True
-		  If Not Me.Reset(0) Then Raise New zlibException(ERR_NOT_ZIPPED)
+		  If Not Me.Reset() Then Raise New zlibException(ERR_NOT_ZIPPED)
 		End Sub
 	#tag EndMethod
 
@@ -21,18 +21,34 @@ Protected Class Iterator
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function LastError() As Integer
+		  Return mLastError
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function MoveNext(WriteTo As Writeable) As Boolean
 		  If mCurrentItem <> Nil Then
 		    If WriteTo <> Nil Then
-		      Dim z As zlib.ZStream = zlib.ZStream.Open(mFileStream, RAW_ENCODING)
-		      z.BufferedReading = False
-		      WriteTo.Write(z.Read(mCurrentItem.CompressedSize))
+		      Select Case mCurrentItem.Method
+		      Case 0 ' not compressed
+		        WriteTo.Write(mFileStream.Read(mCurrentItem.CompressedSize))
+		      Case 8 ' deflated
+		        Dim z As zlib.ZStream = zlib.ZStream.Open(mFileStream, RAW_ENCODING)
+		        z.BufferedReading = False
+		        WriteTo.Write(z.Read(mCurrentItem.CompressedSize))
+		      Else
+		        mLastError = ERR_NOT_ZIPPED
+		        Return False
+		      End Select
 		    Else
 		      mFileStream.Position = mFileStream.Position + mCurrentItem.CompressedSize
 		    End If
 		  End If
 		  
-		  Select Case mFileStream.ReadUInt32
+		  Dim sig As UInt32 = mFileStream.ReadUInt32
+		  
+		  Select Case sig
 		  Case FILE_SIGNATURE
 		    mFileStream.Position = mFileStream.Position - 4
 		    Dim pos As UInt64 = mFileStream.Position
@@ -51,14 +67,11 @@ Protected Class Iterator
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Reset(Index As Integer = 0) As Boolean
+		Function Reset() As Boolean
 		  mFileStream.Position = 0
 		  mCurrentIndex = 0
 		  mCurrentItem = Nil
-		  Do Until mCurrentIndex >= Index And Index > -1
-		    If Not Me.MoveNext(Nil) Then Return (Index = -1 And mLastError = ERR_END_ARCHIVE)
-		  Loop
-		  Return True
+		  Return Me.MoveNext(Nil)
 		End Function
 	#tag EndMethod
 
