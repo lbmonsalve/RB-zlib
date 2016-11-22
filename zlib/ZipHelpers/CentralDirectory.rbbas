@@ -44,34 +44,32 @@ Protected Class CentralDirectory
 		  If mEntries.IndexOf(Item) = -1 Then Raise New KeyNotFoundException
 		  
 		  mFileStream.Position = Item.Offset
-		  If mFileStream.ReadUInt32 = FILE_SIGNATURE Then
-		    mFileStream.Position = mFileStream.Position - 4
-		    Dim header As ZipFileHeader
-		    header.StringValue(True) = mFileStream.Read(header.Size)
+		  Dim header As ZipFileHeader
+		  header.StringValue(True) = mFileStream.Read(header.Size)
+		  Dim src As Readable
+		  If header.Signature <> FILE_SIGNATURE Then
+		    mLastError = ERR_INVALID_ENTRY
+		  Else
 		    Call mFileStream.Read(header.FilenameLength)
 		    Call mFileStream.Read(header.ExtraLength)
 		    
-		    
 		    Select Case header.Method
 		    Case 0 ' not compressed
-		      WriteTo.Write(mFileStream.Read(Item.CompressedSize))
-		      Return True
+		      src = mFileStream
 		      
 		    Case 8 ' deflated
 		      Dim z As zlib.ZStream = zlib.ZStream.Open(mFileStream, RAW_ENCODING)
 		      z.BufferedReading = False
-		      WriteTo.Write(z.Read(Item.CompressedSize))
-		      z.Close
-		      Return True
+		      src = z
 		    Else
 		      mLastError = ERR_NOT_ZIPPED
 		    End Select
-		    
-		  Else
-		    mLastError = ERR_INVALID_ENTRY
 		  End If
 		  
-		  
+		  If mLastError = 0 And src <> Nil Then
+		    WriteTo.Write(src.Read(Item.CompressedSize))
+		    Return True
+		  End If
 		End Function
 	#tag EndMethod
 
