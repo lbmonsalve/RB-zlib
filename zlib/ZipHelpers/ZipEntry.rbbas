@@ -22,12 +22,6 @@ Protected Class ZipEntry
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherItem As zlib.ZipHelpers.ZipEntry) As Integer
-		  Break
-		End Function
-	#tag EndMethod
-
 
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
