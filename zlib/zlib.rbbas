@@ -938,19 +938,18 @@ Protected Module zlib
 		Protected Function ReadZip(ZipFile As FolderItem, ExtractTo As FolderItem, Overwrite As Boolean = False) As FolderItem()
 		  '' Extracts a ZIP file to the ExtractTo directory
 		  '
-		  'Dim bs As BinaryStream = BinaryStream.Open(ZipFile)
-		  'Dim ret() As FolderItem
-		  'Dim zip As New ZipArchive(bs)
-		  'Do Until zip.LastError <> 0
-		  'Dim f As FolderItem = CreateTree(ExtractTo, zip.CurrentName)
-		  'Dim outstream As BinaryStream
-		  'If Not f.Directory Then outstream = BinaryStream.Create(f, Overwrite)
-		  'Call zip.MoveNext(outstream)
-		  'If outstream <> Nil Then outstream.Close
-		  'ret.Append(f)
-		  'Loop Until zip.LastError = ERR_END_ARCHIVE
-		  'zip.Close
-		  'Return ret
+		  Dim bs As BinaryStream = BinaryStream.Open(ZipFile)
+		  Dim ret() As FolderItem
+		  Dim zip As New zlib.ZipHelpers.Iterator(bs)
+		  Do Until zip.LastError <> 0
+		    Dim f As FolderItem = CreateTree(ExtractTo, zip.CurrentItem.FileName)
+		    Dim outstream As BinaryStream
+		    If Not f.Directory Then outstream = BinaryStream.Create(f, Overwrite)
+		    Call zip.MoveNext(outstream)
+		    If outstream <> Nil Then outstream.Close
+		    ret.Append(f)
+		  Loop Until zip.LastError = ERR_END_ARCHIVE
+		  Return ret
 		  
 		End Function
 	#tag EndMethod
