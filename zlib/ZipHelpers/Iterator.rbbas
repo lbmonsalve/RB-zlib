@@ -1,6 +1,12 @@
 #tag Class
 Protected Class Iterator
 	#tag Method, Flags = &h0
+		Sub Close()
+		  If mFileStream <> Nil Then mFileStream.Close
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(ZipStream As BinaryStream)
 		  mFileStream = ZipStream
 		  mFileStream.LittleEndian = True
@@ -27,7 +33,7 @@ Protected Class Iterator
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function MoveNext(WriteTo As Writeable) As Boolean
+		Function MoveNext(WriteTo As Writeable, SkipInvalid As Boolean = False) As Boolean
 		  If mCurrentItem <> Nil Then
 		    If WriteTo <> Nil Then
 		      Select Case mCurrentItem.Method
@@ -46,8 +52,10 @@ Protected Class Iterator
 		    End If
 		  End If
 		  
-		  Dim sig As UInt32 = mFileStream.ReadUInt32
-		  
+		  Dim sig As UInt32
+		  Do Until sig = FILE_SIGNATURE
+		    sig = mFileStream.ReadUInt32
+		  Loop Until Not SkipInvalid
 		  Select Case sig
 		  Case FILE_SIGNATURE
 		    mFileStream.Position = mFileStream.Position - 4
@@ -62,6 +70,7 @@ Protected Class Iterator
 		  Else
 		    mLastError = ERR_INVALID_ENTRY
 		  End Select
+		  If mLastError <> 0 Then Break
 		  Return mLastError = 0
 		End Function
 	#tag EndMethod

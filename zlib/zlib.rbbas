@@ -926,7 +926,7 @@ Protected Module zlib
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function ReadZip(ZipFile As FolderItem, ExtractTo As FolderItem, Overwrite As Boolean = False) As FolderItem()
+		Protected Function ReadZip(ZipFile As FolderItem, ExtractTo As FolderItem, Overwrite As Boolean = False, RecoveryMode As Boolean = False) As FolderItem()
 		  '' Extracts a ZIP file to the ExtractTo directory
 		  '
 		  Dim bs As BinaryStream = BinaryStream.Open(ZipFile)
@@ -936,7 +936,7 @@ Protected Module zlib
 		    Dim f As FolderItem = CreateTree(ExtractTo, zip.CurrentItem.FileName)
 		    Dim outstream As BinaryStream
 		    If Not f.Directory Then outstream = BinaryStream.Create(f, Overwrite)
-		    Call zip.MoveNext(outstream)
+		    Call zip.MoveNext(outstream, RecoveryMode)
 		    If outstream <> Nil Then outstream.Close
 		    ret.Append(f)
 		  Loop
