@@ -99,11 +99,11 @@ Implements zlib.CompressedStream
 		  ' Create a compressed stream from two endpoints. Writing to the stream writes compressed bytes to
 		  ' the OutputStream object; reading from the stream decompresses bytes from the InputStream object.
 		  
-		  Dim ret As zlib.ZStream = Create(OutputStream, CompressionLevel, CompressionStrategy, Encoding, MemoryLevel)
-		  If ret = Nil Then Return Nil
-		  ret.mSource = InputStream
-		  ret.mInflater = New Inflater(Encoding)
-		  Return ret
+		  Dim z As zlib.ZStream = Create(OutputStream, CompressionLevel, CompressionStrategy, Encoding, MemoryLevel)
+		  If z = Nil Then Return Nil
+		  z.mSource = InputStream
+		  z.mInflater = New Inflater(Encoding)
+		  Return z
 		  
 		End Function
 	#tag EndMethod
@@ -253,10 +253,14 @@ Implements zlib.CompressedStream
 		  If mInflater = Nil Then Raise New IOException
 		  Dim data As New MemoryBlock(0)
 		  Dim ret As New BinaryStream(data)
+		  Dim prevmode As Boolean = mBufferedReading
+		  If prevmode Then ret.Write(mReadBuffer)
+		  Me.BufferedReading = False
 		  Do Until Me.EOF
 		    ret.Write(Me.Read(CHUNK_SIZE, encoding))
 		  Loop
 		  ret.Close
+		  Me.BufferedReading = prevmode
 		  Return data
 		End Function
 	#tag EndMethod
@@ -314,6 +318,13 @@ Implements zlib.CompressedStream
 		  ret.Close
 		  Return data
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Reset()
+		  If mDeflater <> Nil Then mDeflater.Reset
+		  If mInflater <> Nil Then mInflater.Reset
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -385,11 +396,8 @@ Implements zlib.CompressedStream
 		#tag EndGetter
 		#tag Setter
 			Set
-			  If mDeflater <> Nil Then
-			    mDeflater.Dictionary = value
-			  ElseIf mInflater <> Nil Then
-			    mInflater.Dictionary = value
-			  End If
+			  If mDeflater <> Nil Then mDeflater.Dictionary = value
+			  If mInflater <> Nil Then mInflater.Dictionary = value
 			End Set
 		#tag EndSetter
 		Dictionary As MemoryBlock
@@ -440,8 +448,12 @@ Implements zlib.CompressedStream
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
-			  If mDeflater = Nil Then Return 0.0
-			  return (mDeflater.Total_Out * 100 / mDeflater.Total_In)
+			  If mDeflater <> Nil Then
+			    Return (mDeflater.Total_Out * 100 / mDeflater.Total_In)
+			  ElseIf mInflater <> Nil Then
+			    Return (mInflater.Total_In * 100 / mInflater.Total_Out)
+			  End If
+			  Return 0.0
 			End Get
 		#tag EndGetter
 		Ratio As Single
