@@ -39,6 +39,19 @@ Protected Module ZipHelpers
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Function ListZip(ZipFile As FolderItem) As zlib.ZipHelpers.ZipEntry()
+		  Dim bs As BinaryStream = BinaryStream.Open(ZipFile)
+		  Dim cd As New zlib.ZipHelpers.CentralDirectory(bs)
+		  Dim items() As ZipEntry
+		  Dim c As Integer = cd.Count
+		  For i As Integer = 0 To c - 1
+		    items.Append(cd.Item(i))
+		  Next
+		  Return items
+		End Function
+	#tag EndMethod
+
 
 	#tag Constant, Name = DIRECTORY_FOOTER_HEADER, Type = Double, Dynamic = False, Default = \"&h06054b50", Scope = Private
 	#tag EndConstant
