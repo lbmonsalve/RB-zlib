@@ -1,13 +1,13 @@
 ## Introduction
-**RB-zlib** is a zlib [binding](http://en.wikipedia.org/wiki/Language_binding) for Realbasic and Xojo projects. It is designed and tested using Realstudio 2011r4.3 on Windows 7. 
+[zlib](http://www.zlib.net/) is the reference implementation for the [deflate](https://en.wikipedia.org/wiki/DEFLATE) compression algorithm. Deflate is the algorithm used by the [gzip](https://tools.ietf.org/html/rfc1952) container format, the the [zip](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) archive format, and [HTTP compression](https://tools.ietf.org/html/rfc7694).
 
-[zlib](http://www.zlib.net/) is the reference implementation for the [deflate](https://en.wikipedia.org/wiki/DEFLATE) compression algorithm. Deflate is the algorithm used by the gzip container format, the the zip archive format, and HTTP compression.
+**RB-zlib** is a zlib [binding](http://en.wikipedia.org/wiki/Language_binding) for Realbasic and Xojo projects. It is designed and tested using Realstudio 2011r4.3 on Windows 7. 
 
 ## Hilights
 * Read and write compressed file or memory streams using a simple [BinaryStream work-alike](https://github.com/charonn0/RB-zlib/wiki/zlib.ZStream).
 * Read and write [tape archive](https://github.com/charonn0/RB-zlib/wiki/zlib.TapeArchive) (.tar) files 
 * Read and write [gzip](https://github.com/charonn0/RB-zlib/wiki/zlib.GZStream) (.gz) files with seek/rewind
-* Read [zip archives](https://github.com/charonn0/RB-zlib/wiki/zlib.ZipArchive) (.zip)
+* Read [zip archives](https://github.com/charonn0/RB-zlib/wiki/zlib.ZipArchive) (.zip) (Experimental)
 * Supports gzip, deflate, and raw deflate compressed streams
 
 ## Getting started
