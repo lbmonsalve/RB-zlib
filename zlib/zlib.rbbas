@@ -478,22 +478,6 @@ Protected Module zlib
 		End Function
 	#tag EndMethod
 
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Sub gzclearerr Lib zlib1 (gzFile As Ptr)
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzclose Lib zlib1 (gzFile As Ptr) As Integer
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzeof Lib zlib1 (gzFile As Ptr) As Boolean
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzflush Lib zlib1 (gzFile As Ptr, Flush As Integer) As Integer
-	#tag EndExternalMethod
-
 	#tag Method, Flags = &h1
 		Protected Function GZip(Source As FolderItem, Destination As FolderItem, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, Overwrite As Boolean = False) As Boolean
 		  ' GZip the Source file into the Destination file. Use GUnZip to reverse.
@@ -585,30 +569,6 @@ Protected Module zlib
 		  Return Deflate(Source, CompressionLevel, zlib.CompressionType.GZip)
 		End Function
 	#tag EndMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzoffset Lib zlib1 (gzFile As Ptr) As Integer
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzopen Lib zlib1 (Path As CString, Mode As CString) As Ptr
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzread Lib zlib1 (gzFile As Ptr, Buffer As Ptr, Length As UInt32) As Integer
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzseek Lib zlib1 (gzFile As Ptr, Offset As Integer, Whence As Integer) As Integer
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzsetparams Lib zlib1 (gzFile As Ptr, Level As Integer, Strategy As Integer) As Integer
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function gzwrite Lib zlib1 (gzFile As Ptr, Buffer As Ptr, Length As UInt32) As Integer
-	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function inflate Lib zlib1 (ByRef Stream As z_stream, Flush As Integer) As Integer

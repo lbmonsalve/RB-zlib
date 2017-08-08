@@ -1,6 +1,6 @@
 #tag Class
 Protected Class ZStream
-Implements zlib.CompressedStream
+Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Close()
 		  // Part of the zlib.CompressedStream interface.
@@ -146,7 +146,6 @@ Implements zlib.CompressedStream
 
 	#tag Method, Flags = &h0
 		Sub Flush(Flushing As zlib.FlushLevel)
-		  // Part of the zlib.CompressedStream interface.
 		  ' Flushing may be:
 		  '   NoFlush:  allows deflate to decide how much data to accumulate before producing output
 		  '   Sync:     all pending output is flushed to the output buffer and the output is aligned on a byte boundary.
