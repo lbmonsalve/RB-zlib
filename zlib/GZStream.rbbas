@@ -28,21 +28,17 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Create(OutputFile As FolderItem, Append As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY) As zlib.GZStream
+		 Shared Function Create(OutputFile As FolderItem, Append As Boolean = False, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, Strategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default) As zlib.GZStream
 		  ' Creates an empty gzip stream, or opens an existing stream for appending
 		  If OutputFile = Nil Or OutputFile.Directory Then Raise New IOException
 		  Dim mode As String = "wb"
 		  If Append Then mode = "ab"
-		  If CompressionLevel <> Z_DEFAULT_COMPRESSION Then
-		    If CompressionLevel < 0 Or CompressionLevel > 9 Then
-		      Break ' Invalid CompressionLevel
-		    Else
-		      mode = mode + Str(CompressionLevel)
-		    End If
+		  If CompressionLevel <> zlib.CompressionLevel.Default Then
+		    mode = mode + Str(Integer(CompressionLevel))
 		  End If
 		  Dim z As GZStream = gzOpen(OutputFile, mode)
 		  z.mLevel = CompressionLevel
-		  z.Strategy = CompressionStrategy
+		  z.Strategy = Strategy
 		  Return z
 		End Function
 	#tag EndMethod
@@ -66,7 +62,7 @@ Implements zlib.CompressedStream
 		  ' called again, a new gzip stream will be started in the output. GZStream.Read is able to read such concatented gzip streams. This
 		  ' will severely impact compression ratios, even into the negative.
 		  
-		  If Not Me.Flush(Z_FINISH) Then Raise New zlibException(mLastError)
+		  If Not Me.Flush(FlushLevel.Finish) Then Raise New zlibException(mLastError)
 		End Sub
 	#tag EndMethod
 
@@ -76,22 +72,22 @@ Implements zlib.CompressedStream
 		  ' Z_PARTIAL_FLUSH: All pending output is flushed to the output buffer, but the output is not aligned to a byte boundary.
 		  ' This completes the current deflate block and follows it with an empty fixed codes block that is 10 bits long.
 		  
-		  If Not Me.Flush(Z_PARTIAL_FLUSH) Then Raise New zlibException(mLastError)
+		  If Not Me.Flush(FlushLevel.Partial) Then Raise New zlibException(mLastError)
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub Flush(Flushing As Integer) Implements zlib.CompressedStream.Flush
+		Private Sub Flush(Flushing As zlib.FlushLevel) Implements zlib.CompressedStream.Flush
 		  // Part of the zlib.CompressedStream interface.
 		  If Not Me.Flush(Flushing) Then Break ' meh
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Flush(Flushing As Integer) As Boolean
+		Function Flush(Flushing As zlib.FlushLevel) As Boolean
 		  If Not mIsWriteable Then Raise New IOException ' opened for reading!
 		  If gzFile = Nil Then Raise New NilObjectException
-		  mLastError = gzflush(gzFile, Flushing)
+		  mLastError = gzflush(gzFile, Integer(Flushing))
 		  Return mLastError = Z_OK
 		End Function
 	#tag EndMethod
@@ -283,7 +279,7 @@ Implements zlib.CompressedStream
 			Set
 			  If Not mIsWriteable Then Raise New IOException ' opened for reading!
 			  If gzFile = Nil Then Raise New NilObjectException
-			  mLastError = gzsetparams(gzFile, value, mStrategy)
+			  mLastError = gzsetparams(gzFile, Integer(value), Integer(mStrategy))
 			  If mLastError = Z_OK Then
 			    mLevel = value
 			  Else
@@ -292,7 +288,7 @@ Implements zlib.CompressedStream
 			  
 			End Set
 		#tag EndSetter
-		Level As Integer
+		Level As zlib.CompressionLevel
 	#tag EndComputedProperty
 
 	#tag Property, Flags = &h21
@@ -308,11 +304,11 @@ Implements zlib.CompressedStream
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mLevel As Integer = Z_DEFAULT_COMPRESSION
+		Private mLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mStrategy As Integer = Z_DEFAULT_STRATEGY
+		Private mStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default
 	#tag EndProperty
 
 	#tag ComputedProperty, Flags = &h0
@@ -343,7 +339,7 @@ Implements zlib.CompressedStream
 		#tag Setter
 			Set
 			  If Not mIsWriteable Or gzFile = Nil Then Raise New IOException
-			  mLastError = gzsetparams(gzFile, mLevel, value)
+			  mLastError = gzsetparams(gzFile, Integer(mLevel), Integer(value))
 			  If mLastError = Z_OK Then
 			    mStrategy = value
 			  Else
@@ -352,7 +348,7 @@ Implements zlib.CompressedStream
 			  
 			End Set
 		#tag EndSetter
-		Strategy As Integer
+		Strategy As zlib.CompressionStrategy
 	#tag EndComputedProperty
 
 

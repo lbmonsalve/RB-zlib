@@ -10,7 +10,7 @@ Inherits FlateEngine
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY, Encoding As Integer = zlib.DEFLATE_ENCODING, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
+		Sub Constructor(CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, CompressionStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, Encoding As zlib.CompressionType = zlib.CompressionType.Deflate, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
 		  ' Construct a new Deflater instance using the specified compression options.
 		  ' If the deflate engine could not be initialized an exception will be raised.
 		  
@@ -18,13 +18,13 @@ Inherits FlateEngine
 		  // Constructor() -- From zlib.FlateEngine
 		  Super.Constructor()
 		  
-		  If CompressionStrategy <> Z_DEFAULT_STRATEGY Or Encoding <> DEFLATE_ENCODING Or MemoryLevel <> DEFAULT_MEM_LVL Then
+		  If CompressionStrategy <> zlib.CompressionStrategy.Default Or Encoding <> CompressionType.Deflate Or MemoryLevel <> DEFAULT_MEM_LVL Then
 		    ' Open the compressed stream using custom options
-		    mLastError = deflateInit2_(zstruct, CompressionLevel, Z_DEFLATED, Encoding, MemoryLevel, CompressionStrategy, zlib.Version, zstruct.Size)
+		    mLastError = deflateInit2_(zstruct, Integer(CompressionLevel), Z_DEFLATED, Integer(Encoding), MemoryLevel, Integer(CompressionStrategy), zlib.Version, zstruct.Size)
 		    
 		  Else
 		    ' process zlib-wrapped deflate data
-		    mLastError = deflateInit_(zstruct, CompressionLevel, zlib.Version, zstruct.Size)
+		    mLastError = deflateInit_(zstruct, Integer(CompressionLevel), zlib.Version, zstruct.Size)
 		    
 		  End If
 		  
@@ -51,7 +51,7 @@ Inherits FlateEngine
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Deflate(Data As MemoryBlock, Flushing As Integer = zlib.Z_NO_FLUSH) As MemoryBlock
+		Function Deflate(Data As MemoryBlock, Flushing As zlib.FlushLevel = zlib.FlushLevel.NoFlush) As MemoryBlock
 		  ' Compresses Data and returns it as a new MemoryBlock, or Nil on error.
 		  ' Check LastError for details if there was an error.
 		  
@@ -67,7 +67,7 @@ Inherits FlateEngine
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Deflate(ReadFrom As Readable, WriteTo As Writeable, Flushing As Integer = zlib.Z_NO_FLUSH, ReadCount As Integer = - 1) As Boolean
+		Function Deflate(ReadFrom As Readable, WriteTo As Writeable, Flushing As zlib.FlushLevel = zlib.FlushLevel.NoFlush, ReadCount As Integer = - 1) As Boolean
 		  ' Reads uncompressed bytes from ReadFrom and writes all compressed output to WriteTo. If
 		  ' ReadCount is specified then exactly ReadCount uncompressed bytes are read; otherwise
 		  ' uncompressed bytes will continue to be read until ReadFrom.EOF. If ReadFrom represents 
@@ -99,7 +99,7 @@ Inherits FlateEngine
 		      ' provide more output space
 		      zstruct.next_out = outbuff
 		      zstruct.avail_out = outbuff.Size
-		      mLastError = deflate(zstruct, Flushing)
+		      mLastError = deflate(zstruct, Integer(Flushing))
 		      If mLastError = Z_STREAM_ERROR Then Return False ' the stream state is inconsistent!!!
 		      ' consume any output
 		      Dim have As UInt32 = CHUNK_SIZE - zstruct.avail_out
@@ -109,7 +109,7 @@ Inherits FlateEngine
 		    
 		  Loop Until (ReadCount > -1 And count >= ReadCount) Or ReadFrom = Nil Or ReadFrom.EOF
 		  
-		  If Flushing = Z_FINISH And mLastError <> Z_STREAM_END Then Raise New zlibException(Z_UNFINISHED_ERROR)
+		  If Flushing = zlib.FlushLevel.Finish And mLastError <> Z_STREAM_END Then Raise New zlibException(Z_UNFINISHED_ERROR)
 		  Return zstruct.avail_in = 0 And (mLastError = Z_OK Or mLastError = Z_STREAM_END)
 		  
 		  
@@ -223,7 +223,7 @@ Inherits FlateEngine
 			  ' next call to deflate().
 			  
 			  If Not IsOpen Then Raise New NilObjectException
-			  mLastError = deflateParams(zstruct, value, mStrategy)
+			  mLastError = deflateParams(zstruct, Integer(value), Integer(mStrategy))
 			  If mLastError = Z_OK Then
 			    mLevel = value
 			  Else
@@ -232,15 +232,15 @@ Inherits FlateEngine
 			  
 			End Set
 		#tag EndSetter
-		Level As Integer
+		Level As zlib.CompressionLevel
 	#tag EndComputedProperty
 
 	#tag Property, Flags = &h1
-		Protected mLevel As Integer = Z_DEFAULT_COMPRESSION
+		Protected mLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected mStrategy As Integer = Z_DEFAULT_STRATEGY
+		Protected mStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default
 	#tag EndProperty
 
 	#tag ComputedProperty, Flags = &h0
@@ -254,7 +254,7 @@ Inherits FlateEngine
 			  ' Dynamically update the compression strategy. The new strategy will take effect only at the next call to deflate().
 			  
 			  If Not IsOpen Then Raise New NilObjectException
-			  mLastError = deflateParams(zstruct, mLevel, value)
+			  mLastError = deflateParams(zstruct, Integer(mLevel), Integer(value))
 			  If mLastError = Z_OK Then
 			    mStrategy = value
 			  Else
@@ -263,8 +263,12 @@ Inherits FlateEngine
 			  
 			End Set
 		#tag EndSetter
-		Strategy As Integer
+		Strategy As zlib.CompressionStrategy
 	#tag EndComputedProperty
+
+
+	#tag Constant, Name = Z_DEFLATED, Type = Double, Dynamic = False, Default = \"8", Scope = Private
+	#tag EndConstant
 
 
 	#tag ViewBehavior

@@ -1,7 +1,7 @@
 #tag Class
 Protected Class ZipArchive
 	#tag Method, Flags = &h0
-		Function AppendFile(ZipPath As String, FileData As Readable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, ResetIndex As Integer = - 1) As Boolean
+		Function AppendFile(ZipPath As String, FileData As Readable, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, ResetIndex As Integer = - 1) As Boolean
 		  If mDirectoryHeader.Signature <> DIRECTORY_SIGNATURE Then
 		    mLastError = ERR_NOT_ZIPPED
 		    Return False
@@ -21,7 +21,7 @@ Protected Class ZipArchive
 		  mArchiveStream.Length = mArchiveStream.Position + header.Size + ZipPath.LenB
 		  mArchiveStream.Position = mArchiveStream.Length
 		  Dim crc As UInt32
-		  If FileData <> Nil And (CompressionLevel > 0 Or CompressionLevel = Z_DEFAULT_COMPRESSION) Then
+		  If FileData <> Nil And (Integer(CompressionLevel) > 0 Or CompressionLevel = zlib.CompressionLevel.Default) Then
 		    header.Method = 8
 		    mZipStream.Deflater.Reset
 		    Do Until FileData.EOF
@@ -29,7 +29,7 @@ Protected Class ZipArchive
 		      crc = CRC32(data, crc, data.Size)
 		      mZipStream.Write(data)
 		    Loop
-		    mZipStream.Flush(Z_FINISH)
+		    mZipStream.Flush(zlib.FlushLevel.Finish)
 		    header.UncompressedSize = mZipStream.Deflater.Total_In
 		    header.CompressedSize = mZipStream.Deflater.Total_Out
 		  Else
@@ -104,17 +104,17 @@ Protected Class ZipArchive
 		  mArchiveStream = ArchiveStream
 		  mArchiveStream.LittleEndian = True
 		  If Not Me.Reset(0) Then Raise New zlibException(ERR_NOT_ZIPPED)
-		  mZipStream = ZStream.Open(mArchiveStream, RAW_ENCODING)
+		  mZipStream = ZStream.Open(mArchiveStream, CompressionType.Raw)
 		  mZipStream.BufferedReading = False
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(ArchiveStream As BinaryStream, CompressionLevel As Integer)
+		Sub Constructor(ArchiveStream As BinaryStream, CompressionLevel As zlib.CompressionLevel)
 		  mArchiveStream = ArchiveStream
 		  mArchiveStream.LittleEndian = True
 		  If Not Me.Reset(0) Then Raise New zlibException(ERR_NOT_ZIPPED)
-		  mZipStream = ZStream.CreatePipe(mArchiveStream, mArchiveStream, CompressionLevel, Z_DEFAULT_STRATEGY, RAW_ENCODING, DEFAULT_MEM_LVL)
+		  mZipStream = ZStream.CreatePipe(mArchiveStream, mArchiveStream, CompressionLevel, CompressionStrategy.Default, CompressionType.Raw, DEFAULT_MEM_LVL)
 		  mZipStream.BufferedReading = False
 		End Sub
 	#tag EndMethod
@@ -165,7 +165,7 @@ Protected Class ZipArchive
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Create(ZipFile As FolderItem, Overwrite As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As zlib.ZipArchive
+		 Shared Function Create(ZipFile As FolderItem, Overwrite As Boolean = False, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default) As zlib.ZipArchive
 		  Dim bs As BinaryStream = BinaryStream.Create(ZipFile, Overwrite)
 		  Dim footer As ZipDirectoryFooter
 		  Dim header As ZipDirectoryHeader
@@ -340,7 +340,7 @@ Protected Class ZipArchive
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Open(ZipFile As FolderItem, Readwrite As Boolean = False, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION) As zlib.ZipArchive
+		 Shared Function Open(ZipFile As FolderItem, Readwrite As Boolean = False, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default) As zlib.ZipArchive
 		  Dim bs As BinaryStream = BinaryStream.Open(ZipFile, Readwrite)
 		  If bs <> Nil Then
 		    If Readwrite Then

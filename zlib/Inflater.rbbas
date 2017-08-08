@@ -2,19 +2,19 @@
 Protected Class Inflater
 Inherits FlateEngine
 	#tag Method, Flags = &h0
-		Sub Constructor(Encoding As Integer = zlib.DEFLATE_ENCODING)
+		Sub Constructor(Encoding As zlib.CompressionType = zlib.CompressionType.Deflate)
 		  ' Construct a new Inflater instance using the specified Encoding. Encoding control,
-		  ' among other things, the type of compression being used. (For GZip pass GZIP_ENCODING)
+		  ' among other things, the type of compression being used. (For GZip pass zlib.CompressionType.GZip)
 		  ' If the inflate engine could not be initialized an exception will be raised.
 		  
 		  // Calling the overridden superclass constructor.
 		  // Constructor() -- From zlib.FlateEngine
 		  Super.Constructor()
 		  
-		  If Encoding = DEFLATE_ENCODING Then
+		  If Encoding = CompressionType.Deflate Then
 		    mLastError = inflateInit_(zstruct, zlib.Version, zstruct.Size)
 		  Else
-		    mLastError = inflateInit2_(zstruct, Encoding, zlib.Version, zstruct.Size)
+		    mLastError = inflateInit2_(zstruct, Integer(Encoding), zlib.Version, zstruct.Size)
 		  End If
 		  If mLastError <> Z_OK Then Raise New zlibException(mLastError)
 		End Sub
@@ -99,7 +99,7 @@ Inherits FlateEngine
 		      ' provide more output space
 		      zstruct.next_out = outbuff
 		      zstruct.avail_out = outbuff.Size
-		      mLastError = inflate(zstruct, Z_NO_FLUSH)
+		      mLastError = inflate(zstruct, Integer(FlushLevel.NoFlush))
 		      ' consume any output
 		      Dim have As UInt32 = CHUNK_SIZE - zstruct.avail_out
 		      If have > 0 Then WriteTo.Write(outbuff.StringValue(0, have))

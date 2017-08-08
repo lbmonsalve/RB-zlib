@@ -11,7 +11,7 @@ Implements zlib.CompressedStream
 		  
 		  If mDeflater <> Nil Then
 		    Try
-		      Me.Flush(Z_FINISH)
+		      Me.Flush(zlib.FlushLevel.Finish)
 		    Catch
 		    End Try
 		  End If
@@ -24,23 +24,23 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(Source As BinaryStream, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY, Encoding As Integer = zlib.Z_DETECT, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
+		Sub Constructor(Source As BinaryStream, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, CompressionStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, Encoding As zlib.CompressionType = zlib.CompressionType.Detect, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
 		  ' Constructs a ZStream from the Source BinaryStream. If the Source's current position is equal
-		  ' to its length then compressed output will be appended, otherwise the Source will be used as 
+		  ' to its length then compressed output will be appended, otherwise the Source will be used as
 		  ' input to be decompressed.
 		  
 		  If Source.Length = Source.Position Then 'compress into Source
-		    If Encoding = Z_DETECT Then Encoding = DEFLATE_ENCODING
+		    If Encoding = CompressionType.Detect Then Encoding = CompressionType.Deflate
 		    Me.Constructor(New Deflater(CompressionLevel, CompressionStrategy, Encoding, MemoryLevel), Source)
 		  Else ' decompress from Source
-		    If Encoding = Z_DETECT Then
+		    If Encoding = CompressionType.Detect Then
 		      Select Case True
 		      Case Source.IsDeflated
-		        Encoding = DEFLATE_ENCODING
+		        Encoding = CompressionType.Deflate
 		      Case Source.IsGZipped
-		        Encoding = GZIP_ENCODING
+		        Encoding = CompressionType.GZip
 		      Else
-		        Encoding = RAW_ENCODING
+		        Encoding = CompressionType.Raw
 		      End Select
 		    End If
 		    Me.Constructor(New Inflater(Encoding), Source)
@@ -49,7 +49,7 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(Source As MemoryBlock, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY, Encoding As Integer = zlib.Z_DETECT, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
+		Sub Constructor(Source As MemoryBlock, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, CompressionStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, Encoding As zlib.CompressionType = zlib.CompressionType.Detect, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
 		  ' Constructs a ZStream from the Source MemoryBlock. If the Source's size is zero then
 		  ' compressed output will be appended, otherwise the Source will be used as input
 		  ' to be decompressed.
@@ -83,7 +83,7 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Create(OutputStream As FolderItem, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY, Overwrite As Boolean = False, Encoding As Integer = zlib.DEFLATE_ENCODING, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL) As zlib.ZStream
+		 Shared Function Create(OutputStream As FolderItem, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, CompressionStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, Overwrite As Boolean = False, Encoding As zlib.CompressionType = zlib.CompressionType.Deflate, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL) As zlib.ZStream
 		  ' Create a compression stream where compressed output is written to the OutputStream file.
 		  
 		  Return Create(BinaryStream.Create(OutputStream, Overwrite), CompressionLevel, CompressionStrategy, Encoding, MemoryLevel)
@@ -91,7 +91,7 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Create(OutputStream As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY, Encoding As Integer = zlib.DEFLATE_ENCODING, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL) As zlib.ZStream
+		 Shared Function Create(OutputStream As Writeable, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, CompressionStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, Encoding As zlib.CompressionType = zlib.CompressionType.Deflate, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL) As zlib.ZStream
 		  ' Create a compression stream where compressed output is written to the OutputStream object.
 		  
 		  Return New ZStream(New Deflater(CompressionLevel, CompressionStrategy, Encoding, MemoryLevel), OutputStream)
@@ -100,7 +100,7 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function CreatePipe(InputStream As Readable, OutputStream As Writeable, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY, Encoding As Integer = zlib.DEFLATE_ENCODING, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL) As zlib.ZStream
+		 Shared Function CreatePipe(InputStream As Readable, OutputStream As Writeable, CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, CompressionStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, Encoding As zlib.CompressionType = zlib.CompressionType.Deflate, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL) As zlib.ZStream
 		  ' Create a compressed stream from two endpoints. Writing to the stream writes compressed bytes to
 		  ' the OutputStream object; reading from the stream decompresses bytes from the InputStream object.
 		  
@@ -140,20 +140,20 @@ Implements zlib.CompressedStream
 		  ' Flushing may degrade compression so it should be used only when necessary. This completes the
 		  ' current deflate block and follows it with an empty stored block that is three bits plus filler bits
 		  ' to the next byte, followed by four bytes (00 00 ff ff).
-		  Me.Flush(Z_SYNC_FLUSH)
+		  Me.Flush(FlushLevel.Sync)
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Flush(Flushing As Integer)
+		Sub Flush(Flushing As zlib.FlushLevel)
 		  // Part of the zlib.CompressedStream interface.
 		  ' Flushing may be:
-		  '   Z_NO_FLUSH:      allows deflate to decide how much data to accumulate before producing output
-		  '   Z_SYNC_FLUSH:    all pending output is flushed to the output buffer and the output is aligned on a byte boundary.
-		  '   Z_PARTIAL_FLUSH: all pending output is flushed to the output buffer, but the output is not aligned to a byte boundary.
-		  '   Z_BLOCK:         a deflate block is completed and emitted, but the output is not aligned on a byte boundary
-		  '   Z_FULL_FLUSH:    like Z_SYNC_FLUSH, and the compression state is reset so that decompression can restart from this point.
-		  '   Z_FINISH:        processing is finished and flushed.
+		  '   NoFlush:  allows deflate to decide how much data to accumulate before producing output
+		  '   Sync:     all pending output is flushed to the output buffer and the output is aligned on a byte boundary.
+		  '   Partial:  all pending output is flushed to the output buffer, but the output is not aligned to a byte boundary.
+		  '   Block:    a deflate block is completed and emitted, but the output is not aligned on a byte boundary
+		  '   Full:     like sync, and the compression state is reset so that decompression can restart from this point.
+		  '   Finish:   processing is finished and flushed.
 		  
 		  If mDeflater = Nil Then Raise New IOException
 		  If Not mDeflater.Deflate(Nil, mDestination, Flushing) Then Raise New zlibException(mDeflater.LastError)
@@ -192,7 +192,7 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Open(InputStream As FolderItem, Encoding As Integer = zlib.Z_DETECT) As zlib.ZStream
+		 Shared Function Open(InputStream As FolderItem, Encoding As zlib.CompressionType = zlib.CompressionType.Detect) As zlib.ZStream
 		  ' Create a decompression stream where the compressed input is read from the Source file.
 		  
 		  Return Open(BinaryStream.Open(InputStream), Encoding)
@@ -200,7 +200,7 @@ Implements zlib.CompressedStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Open(InputStream As Readable, Encoding As Integer = zlib.Z_DETECT) As zlib.ZStream
+		 Shared Function Open(InputStream As Readable, Encoding As zlib.CompressionType = zlib.CompressionType.Detect) As zlib.ZStream
 		  ' Create a decompression stream where the compressed input is read from the InputStream object.
 		  
 		  Return New ZStream(New Inflater(Encoding), InputStream)
@@ -431,7 +431,7 @@ Implements zlib.CompressedStream
 			  If mDeflater <> Nil Then mDeflater.Level = value
 			End Set
 		#tag EndSetter
-		Level As Integer
+		Level As zlib.CompressionLevel
 	#tag EndComputedProperty
 
 	#tag Property, Flags = &h21
@@ -487,7 +487,7 @@ Implements zlib.CompressedStream
 			  If mDeflater <> Nil Then mDeflater.Strategy = value
 			End Set
 		#tag EndSetter
-		Strategy As Integer
+		Strategy As zlib.CompressionStrategy
 	#tag EndComputedProperty
 
 	#tag ComputedProperty, Flags = &h0
