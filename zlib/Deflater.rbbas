@@ -10,7 +10,7 @@ Inherits FlateEngine
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(CompressionLevel As zlib.CompressionLevel = zlib.CompressionLevel.Default, CompressionStrategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, Encoding As zlib.CompressionType = zlib.CompressionType.Deflate, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
+		Sub Constructor(Level As zlib.CompressionLevel, Encoding As zlib.CompressionType, Strategy As zlib.CompressionStrategy = zlib.CompressionStrategy.Default, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
 		  ' Construct a new Deflater instance using the specified compression options.
 		  ' If the deflate engine could not be initialized an exception will be raised.
 		  
@@ -18,19 +18,19 @@ Inherits FlateEngine
 		  // Constructor() -- From zlib.FlateEngine
 		  Super.Constructor()
 		  
-		  If CompressionStrategy <> zlib.CompressionStrategy.Default Or Encoding <> CompressionType.Deflate Or MemoryLevel <> DEFAULT_MEM_LVL Then
+		  If Strategy <> CompressionStrategy.Default Or Encoding <> CompressionType.Deflate Or MemoryLevel <> DEFAULT_MEM_LVL Then
 		    ' Open the compressed stream using custom options
-		    mLastError = deflateInit2_(zstruct, Integer(CompressionLevel), Z_DEFLATED, Integer(Encoding), MemoryLevel, Integer(CompressionStrategy), zlib.Version, zstruct.Size)
+		    mLastError = deflateInit2_(zstruct, Integer(Level), Z_DEFLATED, Integer(Encoding), MemoryLevel, Integer(Strategy), zlib.Version, zstruct.Size)
 		    
 		  Else
 		    ' process zlib-wrapped deflate data
-		    mLastError = deflateInit_(zstruct, Integer(CompressionLevel), zlib.Version, zstruct.Size)
+		    mLastError = deflateInit_(zstruct, Integer(Level), zlib.Version, zstruct.Size)
 		    
 		  End If
 		  
 		  If mLastError <> Z_OK Then Raise New zlibException(mLastError)
-		  mLevel = CompressionLevel
-		  mStrategy = CompressionStrategy
+		  mLevel = Level
+		  mStrategy = Strategy
 		End Sub
 	#tag EndMethod
 
@@ -190,7 +190,7 @@ Inherits FlateEngine
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
-			  Return zstruct.data_type
+			  Return zlib.DataType(zstruct.data_type)
 			End Get
 		#tag EndGetter
 		DataType As UInt32
