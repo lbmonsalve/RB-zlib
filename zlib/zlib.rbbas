@@ -119,52 +119,6 @@ Protected Module zlib
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Function CreateTree(Root As FolderItem, Child As FolderItem) As String
-		  Dim s() As String
-		  If Root = Nil Or Not Root.Directory Or Child = Nil Or Root.AbsolutePath = Child.AbsolutePath Then Return ""
-		  If Child.Directory Then s.Append("")
-		  Do Until Root.AbsolutePath = Child.AbsolutePath
-		    s.Insert(0, Child.Name)
-		    Child = Child.Parent
-		  Loop Until Child = Nil
-		  
-		  Return Join(s, "/")
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Function CreateTree(Root As FolderItem, Path As String) As FolderItem
-		  ' Returns a FolderItem corresponding to Root+Path, creating subdirectories as needed
-		  
-		  If Root = Nil Or Not Root.Directory Then Return Nil
-		  Dim s() As String = Split(Path, "/")
-		  If UBound(s) = -1 Then Return Root
-		  
-		  Dim name As String = s(0)
-		  name = ReplaceAll(name, "?", "_")
-		  name = ReplaceAll(name, "<", "_")
-		  name = ReplaceAll(name, ">", "_")
-		  name = ReplaceAll(name, "\", "_")
-		  name = ReplaceAll(name, ":", "_")
-		  name = ReplaceAll(name, "*", "_")
-		  name = ReplaceAll(name, "|", "_")
-		  root = root.Child(name)
-		  s.Remove(0)
-		  If UBound(s) = -1 Then Return root
-		  If Root.Exists Then
-		    If Not Root.Directory Then
-		      Dim err As New IOException
-		      err.Message = "'" + name + "' is not a directory!"
-		      Raise err
-		    End If
-		  Else
-		    Root.CreateAsFolder
-		  End If
-		  Return CreateTree(Root, Join(s, "/"))
-		End Function
-	#tag EndMethod
-
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function deflate Lib zlib1 (ByRef Stream As z_stream, Flush As Integer) As Integer
 	#tag EndExternalMethod
