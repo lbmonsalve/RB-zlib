@@ -6,17 +6,6 @@ Inherits RuntimeException
 		  Me.ErrorNumber = ErrorCode
 		  
 		  Select Case ErrorCode
-		    
-		    ' archive-related errors (non-zlib)
-		  Case ERR_END_ARCHIVE
-		    Me.Message = "The archive contains no additional entries."
-		  Case ERR_INVALID_ENTRY
-		    Me.Message = "The archive entry is corrupt."
-		  Case ERR_NOT_ZIPPED
-		    Me.Message = "The archive is not zipped."
-		  Case ERR_UNSUPPORTED_COMPRESSION
-		    Me.Message = "The archive entry uses a non-standard compression algorithm."
-		    
 		    'zlib's built-in error messages suck; these are much better
 		  Case Z_BUF_ERROR
 		    Me.Message = "The requested operation requires a larger output buffer."
