@@ -132,7 +132,7 @@ Protected Module zlib
 		  Dim src As BinaryStream = BinaryStream.Open(Source)
 		  Dim ok As Boolean
 		  Try
-		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
+		    ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
 		    ok = Deflate(src, dst, Level, Encoding)
 		  Finally
 		    src.Close
@@ -150,7 +150,7 @@ Protected Module zlib
 		  Dim src As BinaryStream = BinaryStream.Open(Source)
 		  Dim ok As Boolean
 		  Try
-		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
+		    ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
 		    ok = Deflate(src, Destination, Level, Encoding)
 		  Finally
 		    src.Close
@@ -169,7 +169,7 @@ Protected Module zlib
 		  Dim src As BinaryStream = BinaryStream.Open(Source)
 		  Dim ok As Boolean
 		  Try
-		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
+		    ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
 		    ok = Deflate(src, dst, Level, Encoding)
 		  Finally
 		    src.Close
@@ -187,7 +187,7 @@ Protected Module zlib
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
 		  Dim ok As Boolean
 		  Try
-		    ' calls Deflate(MemoryBlock, Writeable, Integer, Integer) As Boolean
+		    ' calls Deflate(MemoryBlock, Writeable, CompressionLevel, CompressionType) As Boolean
 		    ok = Deflate(Source, dst, Level, Encoding)
 		  Finally
 		    dst.Close
@@ -202,7 +202,7 @@ Protected Module zlib
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.Deflate
 		  
 		  Dim src As New BinaryStream(Source)
-		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
+		  ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
 		  Return Deflate(src, Destination, Level, Encoding)
 		End Function
 	#tag EndMethod
@@ -215,7 +215,7 @@ Protected Module zlib
 		  Dim buffer As New MemoryBlock(0)
 		  Dim dst As New BinaryStream(buffer)
 		  Dim src As New BinaryStream(Source)
-		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
+		  ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
 		  If Not Deflate(src, dst, Level, Encoding) Then Return Nil
 		  dst.Close
 		  Return buffer
@@ -229,7 +229,7 @@ Protected Module zlib
 		  Dim dst As BinaryStream = BinaryStream.Create(Destination, Overwrite)
 		  Dim ok As Boolean
 		  Try
-		    ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
+		    ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
 		    ok = Deflate(Source, dst, Level, Encoding)
 		  Finally
 		    dst.Close
@@ -266,7 +266,7 @@ Protected Module zlib
 		  
 		  Dim buffer As New MemoryBlock(0)
 		  Dim stream As New BinaryStream(buffer)
-		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
+		  ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
 		  If Not Deflate(Source, stream, Level, Encoding) Then Return Nil
 		  stream.Close
 		  Return buffer
@@ -347,8 +347,8 @@ Protected Module zlib
 		  ' GUnZip the Source file and return it. Reverses the GZip method
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(FolderItem, MemoryBlock, Integer) As MemoryBlock
-		  Return Inflate(Source, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(FolderItem, MemoryBlock, CompressionType) As MemoryBlock
+		  Return Inflate(Source, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -357,8 +357,8 @@ Protected Module zlib
 		  ' GUnZip the Source file and write the output to the Destination file. Reverses the GZip method
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(FolderItem, FolderItem, Boolean, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Overwrite, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(FolderItem, FolderItem, Boolean, MemoryBlock, CompressionType) As Boolean
+		  Return Inflate(Source, Destination, Overwrite, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -367,8 +367,8 @@ Protected Module zlib
 		  ' Gunzip the Source file into the Destination stream. Reverses the GZip method
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(FolderItem, Writeable, Integer, Integer) As Boolean
-		  Return Inflate(Source, Destination, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(FolderItem, Writeable, Integer, CompressionType) As Boolean
+		  Return Inflate(Source, Destination, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -377,8 +377,8 @@ Protected Module zlib
 		  ' GUnZip the Source data and return it. Reverses the GZip method
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(MemoryBlock, MemoryBlock, Integer) As MemoryBlock
-		  Return Inflate(Source, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(MemoryBlock, MemoryBlock, CompressionType) As MemoryBlock
+		  Return Inflate(Source, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -387,8 +387,8 @@ Protected Module zlib
 		  ' GUnzips the Source data into the Destination file. Reverses the GZip method
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(MemoryBlock, FolderItem, Boolean, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Overwrite, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(MemoryBlock, FolderItem, Boolean, MemoryBlock, CompressionType) As Boolean
+		  Return Inflate(Source, Destination, Overwrite, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -397,8 +397,8 @@ Protected Module zlib
 		  ' GUnzips the Source data into the Destination stream. Reverses the GZip method
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(MemoryBlock, Writeable, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(MemoryBlock, Writeable, MemoryBlock, CompressionType) As Boolean
+		  Return Inflate(Source, Destination, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -407,8 +407,8 @@ Protected Module zlib
 		  ' GUnZip the Source stream and Return it. Reverses the GZip method.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(Readable, MemoryBlock, Integer) As MemoryBlock
-		  Return Inflate(Source, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(Readable, MemoryBlock, CompressionType) As MemoryBlock
+		  Return Inflate(Source, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -417,8 +417,8 @@ Protected Module zlib
 		  ' GUnZip the Source stream into the Destination file. Reverses the GZip method.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(Readable, FolderItem, Boolean, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Overwrite, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(Readable, FolderItem, Boolean, MemoryBlock, CompressionType) As Boolean
+		  Return Inflate(Source, Destination, Overwrite, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -427,8 +427,8 @@ Protected Module zlib
 		  ' GUnZip the Source stream and write the output to the Destination stream. Reverses the GZip method
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GUnZip
 		  
-		  ' calls Inflate(Readable, Writeable, MemoryBlock, Integer) As Boolean
-		  Return Inflate(Source, Destination, Nil, zlib.CompressionType.GZip)
+		  ' calls Inflate(Readable, Writeable, MemoryBlock, CompressionType) As Boolean
+		  Return Inflate(Source, Destination, Nil, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -437,8 +437,8 @@ Protected Module zlib
 		  ' GZip the Source file into the Destination file. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(FolderItem, FolderItem, Integer, Boolean, Integer) As Boolean
-		  Return Deflate(Source, Destination, Level, Overwrite, zlib.CompressionType.GZip)
+		  ' calls Deflate(FolderItem, FolderItem, CompressionLevel, Boolean, CompressionType) As Boolean
+		  Return Deflate(Source, Destination, Level, Overwrite, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -447,8 +447,8 @@ Protected Module zlib
 		  ' GZip the Source file into the Destination stream. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(FolderItem, Writeable, Integer, Integer) As Boolean
-		  Return Deflate(Source, Destination, Level, zlib.CompressionType.GZip)
+		  ' calls Deflate(FolderItem, Writeable, CompressionLevel, CompressionType) As Boolean
+		  Return Deflate(Source, Destination, Level, CompressionType.GZip)
 		  
 		End Function
 	#tag EndMethod
@@ -458,8 +458,8 @@ Protected Module zlib
 		  ' GZip the Source file and return it. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(FolderItem, Integer, Integer) As MemoryBlock
-		  Return Deflate(Source, Level, zlib.CompressionType.GZip)
+		  ' calls Deflate(FolderItem, CompressionLevel, CompressionType) As MemoryBlock
+		  Return Deflate(Source, Level, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -468,8 +468,8 @@ Protected Module zlib
 		  ' GZip the Source data into the Destination file. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(MemoryBlock, FolderItem, Integer, Boolean, Integer) As Boolean
-		  Return Deflate(Source, Destination, Level, Overwrite, zlib.CompressionType.GZip)
+		  ' calls Deflate(MemoryBlock, FolderItem, CompressionLevel, Boolean, CompressionType) As Boolean
+		  Return Deflate(Source, Destination, Level, Overwrite, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -479,8 +479,8 @@ Protected Module zlib
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
 		  Dim src As New BinaryStream(Source)
-		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		  Return Deflate(src, Destination, Level, zlib.CompressionType.GZip)
+		  ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
+		  Return Deflate(src, Destination, Level, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -489,8 +489,8 @@ Protected Module zlib
 		  ' GZip the Source data and return it. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(MemoryBlock, Integer, Integer) As MemoryBlock
-		  Return Deflate(Source, Level, zlib.CompressionType.GZip)
+		  ' calls Deflate(MemoryBlock, CompressionLevel, CompressionType) As MemoryBlock
+		  Return Deflate(Source, Level, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -499,8 +499,8 @@ Protected Module zlib
 		  ' GZip the Source stream into the Destination file. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(Readable, FolderItem, Integer, Boolean, Integer) As Boolean
-		  Return Deflate(Source, Destination, Level, Overwrite, zlib.CompressionType.GZip)
+		  ' calls Deflate(Readable, FolderItem, CompressionLevel, Boolean, CompressionType) As Boolean
+		  Return Deflate(Source, Destination, Level, Overwrite, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -509,8 +509,8 @@ Protected Module zlib
 		  ' GZip the Source stream and write the output to the Destination stream. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(Readable, Writeable, Integer, Integer) As Boolean
-		  Return Deflate(Source, Destination, Level, zlib.CompressionType.GZip)
+		  ' calls Deflate(Readable, Writeable, CompressionLevel, CompressionType) As Boolean
+		  Return Deflate(Source, Destination, Level, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
@@ -519,8 +519,8 @@ Protected Module zlib
 		  ' GZip the Source stream and return it. Use GUnZip to reverse.
 		  ' See: https://github.com/charonn0/RB-zlib/wiki/zlib.GZip
 		  
-		  ' calls Deflate(Readable, Integer, Integer) As MemoryBlock
-		  Return Deflate(Source, Level, zlib.CompressionType.GZip)
+		  ' calls Deflate(Readable, CompressionLevel, CompressionType) As MemoryBlock
+		  Return Deflate(Source, Level, CompressionType.GZip)
 		End Function
 	#tag EndMethod
 
