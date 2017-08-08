@@ -20,11 +20,11 @@ Inherits FlateEngine
 		  
 		  If Strategy <> CompressionStrategy.Default Or Encoding <> CompressionType.Deflate Or MemoryLevel <> DEFAULT_MEM_LVL Then
 		    ' Open the compressed stream using custom options
-		    mLastError = deflateInit2_(zstruct, Integer(Level), Z_DEFLATED, Integer(Encoding), MemoryLevel, Integer(Strategy), zlib.Version, zstruct.Size)
+		    mLastError = deflateInit2_(zstruct, Integer(Level), Z_DEFLATED, Integer(Encoding), MemoryLevel, Integer(Strategy), "1.2.8" + Chr(0), zstruct.Size)
 		    
 		  Else
 		    ' process zlib-wrapped deflate data
-		    mLastError = deflateInit_(zstruct, Integer(Level), zlib.Version, zstruct.Size)
+		    mLastError = deflateInit_(zstruct, Integer(Level), "1.2.8" + Chr(0), zstruct.Size)
 		    
 		  End If
 		  
