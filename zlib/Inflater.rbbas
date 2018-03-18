@@ -64,12 +64,12 @@ Inherits FlateEngine
 		Function Inflate(ReadFrom As Readable, WriteTo As Writeable, ReadCount As Integer = - 1) As Boolean
 		  ' Reads compressed bytes from ReadFrom and writes all decompressed output to WriteTo. If
 		  ' ReadCount is specified then exactly ReadCount compressed bytes are read; otherwise
-		  ' compressed bytes will continue to be read until ReadFrom.EOF. If ReadFrom represents more 
-		  ' than CHUNK_SIZE compressed bytes then they will be read in chunks of CHUNK_SIZE. The size 
-		  ' of the output is variable, typically many times larger than the input, but will be written 
-		  ' to WriteTo in chunks no greater than CHUNK_SIZE. Consult the zlib documentation before 
-		  ' changing CHUNK_SIZE. If this method returns True then all valid output was written and the 
-		  ' decompressor is ready for more input. Check LastError to determine whether there was an 
+		  ' compressed bytes will continue to be read until ReadFrom.EOF. If ReadFrom represents more
+		  ' than CHUNK_SIZE compressed bytes then they will be read in chunks of CHUNK_SIZE. The size
+		  ' of the output is variable, typically many times larger than the input, but will be written
+		  ' to WriteTo in chunks no greater than CHUNK_SIZE. Consult the zlib documentation before
+		  ' changing CHUNK_SIZE. If this method returns True then all valid output was written and the
+		  ' decompressor is ready for more input. Check LastError to determine whether there was an
 		  ' error while decompressing.
 		  
 		  If Not IsOpen Then Return False
@@ -102,9 +102,9 @@ Inherits FlateEngine
 		    
 		  Loop Until (ReadCount > -1 And count >= ReadCount) Or ReadFrom = Nil Or ReadFrom.EOF
 		  
-		  ' Z_BUF_ERROR is non-fatal to the decompression process; you can keep 
+		  ' Z_BUF_ERROR is non-fatal to the decompression process; you can keep
 		  ' providing input to the decompressor in search of a valid deflate block.
-		  ' 
+		  '
 		  Return mLastError = Z_OK Or mLastError = Z_STREAM_END Or mLastError = Z_BUF_ERROR
 		  
 		End Function
@@ -112,7 +112,7 @@ Inherits FlateEngine
 
 	#tag Method, Flags = &h0
 		Function InflateMark() As UInt32
-		  ' If the upper 16 bits of the return value is –1 and the lower bits are zero, then inflate() is currently decoding 
+		  ' If the upper 16 bits of the return value is –1 and the lower bits are zero, then inflate() is currently decoding
 		  ' information outside of a block. If the upper value is –1 and the lower value is non-zero, then inflate is in the
 		  ' middle of a stored block, with the lower value equaling the number of bytes from the input remaining to copy. If
 		  ' the upper value is not –1, then it is the number of bits back from the current bit position in the input of the
@@ -224,6 +224,16 @@ Inherits FlateEngine
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Encoding"
+			Group="Behavior"
+			Type="Integer"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="HasHeader"
+			Group="Behavior"
+			Type="Boolean"
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
 			Visible=true

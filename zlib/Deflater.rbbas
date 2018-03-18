@@ -72,13 +72,13 @@ Inherits FlateEngine
 		Function Deflate(ReadFrom As Readable, WriteTo As Writeable, Flushing As Integer = zlib.Z_NO_FLUSH, ReadCount As Integer = - 1) As Boolean
 		  ' Reads uncompressed bytes from ReadFrom and writes all compressed output to WriteTo. If
 		  ' ReadCount is specified then exactly ReadCount uncompressed bytes are read; otherwise
-		  ' uncompressed bytes will continue to be read until ReadFrom.EOF. If ReadFrom represents 
+		  ' uncompressed bytes will continue to be read until ReadFrom.EOF. If ReadFrom represents
 		  ' more than CHUNK_SIZE uncompressed bytes then they will be read in chunks of CHUNK_SIZE.
-		  ' The size of the output is variable, typically smaller than the input, and will be written 
-		  ' to WriteTo in chunks no greater than CHUNK_SIZE. Consult the zlib documentation before 
-		  ' changing CHUNK_SIZE. If this method returns True then all uncompressed bytes were 
-		  ' processed and the compressor is ready for more input. Depending on the state of the 
-		  ' compressor and the Flushing parameter, compressed output might not be written until a 
+		  ' The size of the output is variable, typically smaller than the input, and will be written
+		  ' to WriteTo in chunks no greater than CHUNK_SIZE. Consult the zlib documentation before
+		  ' changing CHUNK_SIZE. If this method returns True then all uncompressed bytes were
+		  ' processed and the compressor is ready for more input. Depending on the state of the
+		  ' compressor and the Flushing parameter, compressed output might not be written until a
 		  ' subsequent call to this method.
 		  
 		  If Not IsOpen Then Return False
@@ -129,9 +129,9 @@ Inherits FlateEngine
 
 	#tag Method, Flags = &h0
 		Function Pending() As Single
-		  ' Returns the number of bytes and bits of output that have been generated, but not yet provided 
-		  ' in the available output. The bytes not provided would be due to the available output space 
-		  ' being consumed. The number of bits of output not provided are between 0 and 7, where they await 
+		  ' Returns the number of bytes and bits of output that have been generated, but not yet provided
+		  ' in the available output. The bytes not provided would be due to the available output space
+		  ' being consumed. The number of bits of output not provided are between 0 and 7, where they await
 		  ' more bits to join them in order to fill out a full byte.
 		  
 		  If Not IsOpen Then Return 0.0
@@ -145,7 +145,7 @@ Inherits FlateEngine
 
 	#tag Method, Flags = &h0
 		Function Prime(Bits As Integer, Value As Integer) As Boolean
-		  ' Inserts bits in the deflate output stream. The intent is that this function is used to start off the deflate 
+		  ' Inserts bits in the deflate output stream. The intent is that this function is used to start off the deflate
 		  ' output with the bits leftover from a previous deflate stream when appending to it. As such, this function can
 		  ' only be used for raw deflate, and must be used before the first deflate() call (or after Reset). Bits must be
 		  ' less than or equal to 16, and that many of the least significant bits of value will be inserted in the output.
@@ -159,7 +159,7 @@ Inherits FlateEngine
 
 	#tag Method, Flags = &h0
 		Sub Reset()
-		  ' Reinitializes the compressor but does not free and reallocate all the internal compression state. 
+		  ' Reinitializes the compressor but does not free and reallocate all the internal compression state.
 		  ' The stream will keep the same compression level and any other attributes that may have been set by
 		  ' the constructor.
 		  
@@ -181,9 +181,9 @@ Inherits FlateEngine
 
 	#tag Method, Flags = &h0
 		Function Tune(GoodLength As Integer, MaxLazy As Integer, NiceLength As Integer, MaxChain As Integer) As Boolean
-		  ' Fine tune deflate's internal compression parameters. This should only be used by someone who understands the 
-		  ' algorithm used by zlib's deflate for searching for the best matching string, and even then only by the most 
-		  ' fanatic optimizer trying to squeeze out the last compressed bit for their specific input data. 
+		  ' Fine tune deflate's internal compression parameters. This should only be used by someone who understands the
+		  ' algorithm used by zlib's deflate for searching for the best matching string, and even then only by the most
+		  ' fanatic optimizer trying to squeeze out the last compressed bit for their specific input data.
 		  
 		  If Not IsOpen Then Return False
 		  mLastError = deflateTune(zstruct, GoodLength, MaxLazy, NiceLength, MaxChain)
@@ -211,8 +211,8 @@ Inherits FlateEngine
 		#tag EndGetter
 		#tag Setter
 			Set
-			  ' Sets the compression dictionary from the given byte sequence without producing any compressed output. Must be 
-			  ' set immediately after the constructor or a call to Reset(), but before the first call to deflate. The compressor 
+			  ' Sets the compression dictionary from the given byte sequence without producing any compressed output. Must be
+			  ' set immediately after the constructor or a call to Reset(), but before the first call to deflate. The compressor
 			  ' and decompressor must use exactly the same dictionary (see Inflater.Dictionary).
 			  
 			  If value = Nil Or Not IsOpen Then Return
@@ -295,6 +295,11 @@ Inherits FlateEngine
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Encoding"
+			Group="Behavior"
+			Type="Integer"
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
 			Visible=true

@@ -31,7 +31,7 @@
 		Extension=.zip
 		Flags=&h0
 		MacCreator=SITx
-		MacType=ZIP 
+		MacType=ZIP
 		Name=application/zip
 	#tag EndFileType
 

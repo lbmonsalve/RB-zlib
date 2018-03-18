@@ -10,5 +10,11 @@
 			Begin BuildStepList Windows
 				Begin BuildProjectStep Build
 				End
+				Begin CopyFilesBuildStep CopyFilesStepWin
+					AppliesTo = 0
+					Destination = 0
+					Subdirectory = 
+					FolderItem = Li4AYnVpbGQAemxpYjEuZGxs
+				End
 			End
 #tag EndBuildAutomation
