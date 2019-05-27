@@ -5,7 +5,7 @@ Implements Readable,Writeable
 		Sub Close()
 		  ' End the stream. If the stream is being written/compressed then all pending output is flushed.
 		  ' If the stream is being read/decompressed then all pending output is discarded; check EOF to
-		  ' determine whether there is pending output. After this method returns all calls to Read/Write 
+		  ' determine whether there is pending output. After this method returns all calls to Read/Write
 		  ' will raise an exception.
 		  
 		  If mDeflater <> Nil Then
@@ -26,7 +26,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Constructor(Source As BinaryStream, CompressionLevel As Integer = zlib.Z_DEFAULT_COMPRESSION, CompressionStrategy As Integer = zlib.Z_DEFAULT_STRATEGY, Encoding As Integer = zlib.Z_DETECT, MemoryLevel As Integer = zlib.DEFAULT_MEM_LVL)
 		  ' Constructs a ZStream from the Source BinaryStream. If the Source's current position is equal
-		  ' to its length then compressed output will be appended, otherwise the Source will be used as 
+		  ' to its length then compressed output will be appended, otherwise the Source will be used as
 		  ' input to be decompressed.
 		  
 		  If Source.Length = Source.Position Then 'compress into Source
@@ -258,7 +258,7 @@ Implements Readable,Writeable
 		    End If
 		  End If
 		  If readsz > 0 Then
-		    If Not mInflater.Inflate(mSource, ret, readsz) Then 
+		    If Not mInflater.Inflate(mSource, ret, readsz) Then
 		      Dim err As New zlibException(mInflater.LastError)
 		      If mInflater.Msg <> Nil Then err.Message = err.Message + EndOfLine + "Additional info: " + mInflater.Msg.CString(0)
 		      Raise err
@@ -398,7 +398,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Write(Data As String)
 		  // Part of the Writeable interface.
-		  ' Write Data to the compressed stream. 
+		  ' Write Data to the compressed stream.
 		  ' NOTE: the Data may not be immediately written to the output; the compressor will write
 		  ' to the output at times dictated by the compression parameters. Use the Flush method to
 		  ' forcibly write pending output.
@@ -586,6 +586,11 @@ Implements Readable,Writeable
 			Group="Behavior"
 			InitialValue="True"
 			Type="Boolean"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Encoding"
+			Group="Behavior"
+			Type="Integer"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Index"
